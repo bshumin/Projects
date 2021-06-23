@@ -1,0 +1,21 @@
+﻿cl : command line warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  main.c
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(20,8): warning C4101: 'hDC': unreferenced local variable
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(136,21): warning C4047: '!=': 'int' differs in levels of indirection from 'void *'
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(136,36): warning C4047: '!=': 'int' differs in levels of indirection from 'void *'
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(236,24): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(237,24): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(247,28): warning C4113: 'void (__cdecl *)()' differs in parameter lists from '_beginthread_proc_type'
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(378,33): warning C4047: '==': 'int' differs in levels of indirection from 'void *'
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(378,59): warning C4047: '==': 'int' differs in levels of indirection from 'void *'
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(393,19): warning C4047: '==': 'int' differs in levels of indirection from 'void *'
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(396,21): warning C4047: '==': 'int' differs in levels of indirection from 'void *'
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(399,20): warning C4047: '==': 'int' differs in levels of indirection from 'void *'
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(560,57): warning C4244: 'function': conversion from 'float' to 'int', possible loss of data
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(560,145): warning C4244: 'function': conversion from 'double' to 'int', possible loss of data
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(502,6): warning C4101: 'lowerR': unreferenced local variable
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(502,22): warning C4101: 'lowerC': unreferenced local variable
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(502,14): warning C4101: 'upperR': unreferenced local variable
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\main.c(502,30): warning C4101: 'upperC': unreferenced local variable
+main.obj : warning LNK4075: ignoring '/EDITANDCONTINUE' due to '/SAFESEH' specification
+  plus.vcxproj -> C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\.\Debug\plus.exe

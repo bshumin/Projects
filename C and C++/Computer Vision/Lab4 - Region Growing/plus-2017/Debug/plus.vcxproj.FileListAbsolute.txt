@@ -1,0 +1,4 @@
+C:\Users\bjshu\Desktop\plus-2017\Debug\plus.exe
+C:\Users\bjshu\Desktop\plus-2017\Debug\plus.pdb
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\Debug\plus.exe
+C:\Users\bjshu\Desktop\ECEFall2020\compvis\lab4\plus-2017\Debug\plus.pdb

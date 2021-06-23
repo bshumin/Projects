@@ -1,0 +1,178 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (United States) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+ID_MAIN_MENU MENU
+BEGIN
+    POPUP "File"
+    BEGIN
+        MENUITEM "&Load Image",                 ID_FILE_LOAD
+        MENUITEM SEPARATOR
+        MENUITEM "&Quit",                       ID_FILE_QUIT
+    END
+    POPUP "Display"
+    BEGIN
+        MENUITEM "Show pixel coordinates",      ID_SHOWPIXELCOORDS
+        MENUITEM "Big Dots",                    ID_DISPLAY_BIGDOTS
+        POPUP "Region Grow"
+        BEGIN
+            MENUITEM "Play",                        ID_REGIONGROW_PLAY
+            MENUITEM "Step",                        ID_REGIONGROW_STEP
+            MENUITEM "Predicates",                  ID_REGIONGROW_PREDICATES
+            MENUITEM "Color",                       ID_REGIONGROW_COLOR
+            MENUITEM "Clear Regions",               ID_REGIONGROW_CLEARREGIONS
+        END
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+ID_PLUS_ICON            ICON                    "icon1.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG_PRED DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,198,155,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,252,155,50,14
+    EDITTEXT        IDC_EDIT_CENTROID,38,82,59,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Static",IDC_Centroid,32,66,80,8
+    EDITTEXT        IDC_EDIT_INTENSITY,184,84,59,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Static",IDC_INTENSITY,169,66,113,8
+END
+
+IDD_DIALOG_COLOR DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Dialog"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK_COLOR,198,155,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,252,155,50,14
+    EDITTEXT        IDC_EDIT_RED,38,87,59,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_EDIT_GREEN,122,87,59,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_EDIT_BLUE,205,87,59,12,ES_AUTOHSCROLL | ES_NUMBER
+    LTEXT           "Static",IDC_BLUE,220,72,27,8
+    LTEXT           "Static",IDC_GREEN,136,71,27,8
+    LTEXT           "Static",IDC_RED,52,71,27,8
+    LTEXT           "Static",IDC_COLOR_STATEMENT,110,36,115,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_DIALOG_PRED, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_DIALOG_COLOR, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DIALOG_PRED AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_DIALOG_COLOR AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+#endif    // English (United States) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
