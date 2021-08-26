@@ -55,15 +55,28 @@ mat1 = np.matrix(data1)  # matrix type for use in normal function
 
 [x, y] = getXY(data1)
 
+# make A and B matrices
+mat_a = np.empty((0, 2), dtype=float)
+for i in range(len(x)):
+    mat_a = np.append(mat_a, np.array([[x[i], 1]]), axis=0)
+
+mat_a = np.matrix(mat_a)
+mat_b = np.matrix(y, dtype=float).getT()
+
+print(mat_a)
+print(mat_b)
+
 # show data as it appears
 plt.scatter(x, y, marker='o')
 
 plt.xlabel('x-axis')
 plt.ylabel('y-axis')
 plt.title('Part 1')
-plt.show()
+#  plt.show()
 plt.close()
 stats.matrix_normal()
+
+#  print(np.linalg.solve(mat_a.getT(), mat_b))
 # ====================================================== PART 2 ====================================================== #
 data2 = [[5, 1],
          [6, 1],
@@ -72,7 +85,6 @@ data2 = [[5, 1],
          [8, 14],  # added point to reduce model accuracy
          [9, 5]]
 mat2 = np.matrix(data2)  # matrix type for use in normal function
-
 [x, y] = getXY(data2)
 
 # show data as it appears
@@ -81,7 +93,7 @@ plt.scatter(x, y, marker='o')
 plt.xlabel('x-axis')
 plt.ylabel('y-axis')
 plt.title('Part 2')
-plt.show()
+#plt.show()
 plt.close()
 # ====================================================== PART 3 ====================================================== #
 print(readData('data.txt'))
