@@ -1,6 +1,4 @@
 import numpy as np
-import scipy as sp
-import scipy.stats as stats
 import matplotlib.pyplot as plt
 
 
@@ -64,8 +62,54 @@ def getNormalFuncFirstOrder(data, partnum):
     # print(m)
     # print(b)
 
-    x2 = np.linspace(x[0], x[len(x) - 1], 100)
+    x2 = np.linspace(min(x), max(x), 100)
     y2 = m * x2 + b
+
+    plt.plot(x2, y2, 'r')
+
+    plt.show()
+    plt.close()
+
+def getNormalFuncInvX(data, partnum):
+    [x, y] = getXY(data3, 2)
+
+    # make A and B matrices
+    mat_a = np.empty((0, 2), dtype=float)
+    for i in range(len(x)):
+        mat_a = np.append(mat_a, np.array([[1 / x[i], 1]]), axis=0)
+
+    mat_a = np.matrix(mat_a)
+    mat_b = np.matrix(y, dtype=float).getT()
+
+    # print(mat_a)
+    # print()
+    # print(mat_b)
+    # print()
+
+    # show data as it appears
+    plt.scatter(x, y, marker='.')
+    plt.grid()
+
+    plt.xlabel('# of Bites')
+    plt.ylabel('Kcals/bite')
+    plt.title('Part ' + str(partnum))
+
+    mat_x = (mat_a.getT() * mat_a)
+    mat_x = np.linalg.inv(mat_x)
+    mat_x = mat_x * mat_a.getT() * mat_b
+
+    # print(mat_x)
+    # print()
+
+    # get form of y = m*(1/x) + b
+    m = float(mat_x[0])
+    b = float(mat_x[1])
+
+    # print(m)
+    # print(b)
+
+    x2 = np.linspace(0.5, max(x), 10000)
+    y2 = m * (1 / x2) + b
 
     plt.plot(x2, y2, 'r')
 
@@ -121,31 +165,5 @@ getNormalFuncFirstOrder(data2, 2)  # get normal function of data based on a firs
 # ====================================================== PART 3 ====================================================== #
 
 data3 = readData('data.txt')
-print(data3)
 
-[x, y] = getXY(data3, 2)
-
-# make A and B matrices
-mat_a = np.empty((0, 2), dtype=float)
-for i in range(len(x)):
-    mat_a = np.append(mat_a, np.array([[x[i], 1]]), axis=0)
-
-mat_a = np.matrix(mat_a)
-mat_b = np.matrix(y, dtype=float).getT()
-
-print(mat_a)
-print()
-print(mat_b)
-print()
-
-# show data as it appears
-plt.scatter(x, y, marker='.')
-plt.grid()
-
-plt.xlabel('# of Bites')
-plt.ylabel('Kcals/bite')
-plt.title('Part 3')
-# plt.show()
-
-plt.show()
-plt.close()
+getNormalFuncInvX(data3, 3)
