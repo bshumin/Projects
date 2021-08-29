@@ -5,19 +5,72 @@ import matplotlib.pyplot as plt
 
 
 # helper functions
-def getXY(matrix):
+def getXY(matrix, type):
     try:
         x_data = []
         y_data = []
 
-        for val in matrix:
-            x_data.append(val[0])
-            y_data.append(val[1])
+        if type == 1:
+            for val in matrix:
+                x_data.append(val[0])
+                y_data.append(val[1])
+        elif type == 2:
+            for val in matrix:
+                x_data.append(val[2])
+                y_data.append(val[3]/val[2])
 
         return [x_data, y_data]
     except:
         print("Failed to get X and Y coordinates. Check dimensions of matrix passed, it must be of Nx2 size.")
         exit()
+
+
+def getNormalFuncFirstOrder(data, partnum):
+    [x, y] = getXY(data, 1)
+
+    # make A and B matrices
+    mat_a = np.empty((0, 2), dtype=float)
+    for i in range(len(x)):
+        mat_a = np.append(mat_a, np.array([[x[i], 1]]), axis=0)
+
+    mat_a = np.matrix(mat_a)
+    mat_b = np.matrix(y, dtype=float).getT()
+
+    # print(mat_a)
+    # print()
+    # print(mat_b)
+    # print()
+
+    # show data as it appears
+    plt.scatter(x, y, marker='o')
+    plt.grid(which='major')
+
+    plt.xlabel('x-axis')
+    plt.ylabel('y-axis')
+    plt.title('Part ' + str(partnum))
+    # plt.show()
+
+    mat_x = (mat_a.getT() * mat_a)
+    mat_x = np.linalg.inv(mat_x)
+    mat_x = mat_x * mat_a.getT() * mat_b
+
+    # print(mat_x)
+    # print()
+
+    # get form of y = m*x + b
+    m = float(mat_x[0])
+    b = float(mat_x[1])
+
+    # print(m)
+    # print(b)
+
+    x2 = np.linspace(x[0], x[len(x) - 1], 100)
+    y2 = m * x2 + b
+
+    plt.plot(x2, y2, 'r')
+
+    plt.show()
+    plt.close()
 
 
 def readData(file_in):
@@ -51,9 +104,26 @@ data1 = [[5, 1],
          [7, 2],
          [8, 3],
          [9, 5]]
-mat1 = np.matrix(data1)  # matrix type for use in normal function
 
-[x, y] = getXY(data1)
+getNormalFuncFirstOrder(data1, 1)  # get normal function of data based on a first order linear regression
+
+# ====================================================== PART 2 ====================================================== #
+data2 = [[5, 1],
+         [6, 1],
+         [7, 2],
+         [8, 3],
+         [8, 14],  # added point to reduce model accuracy
+         [9, 5]]
+
+
+getNormalFuncFirstOrder(data2, 2)  # get normal function of data based on a first order linear regression
+
+# ====================================================== PART 3 ====================================================== #
+
+data3 = readData('data.txt')
+print(data3)
+
+[x, y] = getXY(data3, 2)
 
 # make A and B matrices
 mat_a = np.empty((0, 2), dtype=float)
@@ -64,36 +134,18 @@ mat_a = np.matrix(mat_a)
 mat_b = np.matrix(y, dtype=float).getT()
 
 print(mat_a)
+print()
 print(mat_b)
+print()
 
 # show data as it appears
-plt.scatter(x, y, marker='o')
+plt.scatter(x, y, marker='.')
+plt.grid()
 
-plt.xlabel('x-axis')
-plt.ylabel('y-axis')
-plt.title('Part 1')
-#  plt.show()
+plt.xlabel('# of Bites')
+plt.ylabel('Kcals/bite')
+plt.title('Part 3')
+# plt.show()
+
+plt.show()
 plt.close()
-stats.matrix_normal()
-
-#  print(np.linalg.solve(mat_a.getT(), mat_b))
-# ====================================================== PART 2 ====================================================== #
-data2 = [[5, 1],
-         [6, 1],
-         [7, 2],
-         [8, 3],
-         [8, 14],  # added point to reduce model accuracy
-         [9, 5]]
-mat2 = np.matrix(data2)  # matrix type for use in normal function
-[x, y] = getXY(data2)
-
-# show data as it appears
-plt.scatter(x, y, marker='o')
-
-plt.xlabel('x-axis')
-plt.ylabel('y-axis')
-plt.title('Part 2')
-#plt.show()
-plt.close()
-# ====================================================== PART 3 ====================================================== #
-print(readData('data.txt'))
