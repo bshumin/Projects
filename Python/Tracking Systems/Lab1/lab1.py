@@ -52,8 +52,9 @@ def getNormalFuncFirstOrder(data, partnum):
     mat_x = np.linalg.inv(mat_x)
     mat_x = mat_x * mat_a.getT() * mat_b
 
+    print('Solution to normal equation in part ' + str(partnum) + ':')
     print(mat_x)
-    # print()
+    print()
 
     # get form of y = m*x + b
     m = float(mat_x[0])
@@ -98,8 +99,9 @@ def getNormalFuncInvX(data, partnum):
     mat_x = np.linalg.inv(mat_x)
     mat_x = mat_x * mat_a.getT() * mat_b
 
-    # print(mat_x)
-    # print()
+    print('Solution to normal equation in part ' + str(partnum) + ':')
+    print(mat_x)
+    print()
 
     # get form of y = m*(1/x) + b
     m = float(mat_x[0])
