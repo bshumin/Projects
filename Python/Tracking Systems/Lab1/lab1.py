@@ -52,7 +52,7 @@ def getNormalFuncFirstOrder(data, partnum):
     mat_x = np.linalg.inv(mat_x)
     mat_x = mat_x * mat_a.getT() * mat_b
 
-    # print(mat_x)
+    print(mat_x)
     # print()
 
     # get form of y = m*x + b
