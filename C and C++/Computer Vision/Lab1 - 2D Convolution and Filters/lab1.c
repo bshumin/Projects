@@ -6,6 +6,7 @@
   ** methods over 10 runs.
 	**
 	** To compile, must link using -lrt  (man clock_gettime() function).
+  ** Compile command: gcc lab1.c -Wall -lrt
 	*/
 
 #include <stdio.h>
