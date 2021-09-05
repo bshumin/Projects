@@ -34,11 +34,6 @@ def getNormalFuncFirstOrder(data, partnum):
     mat_a = np.matrix(mat_a)
     mat_b = np.matrix(y, dtype=float).getT()
 
-    # print(mat_a)
-    # print()
-    # print(mat_b)
-    # print()
-
     # show data as it appears
     plt.scatter(x, y, marker='o')
     plt.grid(which='major')
@@ -60,9 +55,6 @@ def getNormalFuncFirstOrder(data, partnum):
     m = float(mat_x[0])
     b = float(mat_x[1])
 
-    # print(m)
-    # print(b)
-
     x2 = np.linspace(min(x), max(x), 100)
     y2 = m * x2 + b
 
@@ -81,11 +73,6 @@ def getNormalFuncInvX(data, partnum):
 
     mat_a = np.matrix(mat_a)
     mat_b = np.matrix(y, dtype=float).getT()
-
-    # print(mat_a)
-    # print()
-    # print(mat_b)
-    # print()
 
     # show data as it appears
     plt.scatter(x, y, marker='.')
@@ -106,9 +93,6 @@ def getNormalFuncInvX(data, partnum):
     # get form of y = m*(1/x) + b
     m = float(mat_x[0])
     b = float(mat_x[1])
-
-    # print(m)
-    # print(b)
 
     x2 = np.linspace(0.5, max(x), 10000)
     y2 = m * (1 / x2) + b
