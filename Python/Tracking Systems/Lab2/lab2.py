@@ -57,118 +57,127 @@ def f(an, x, y):
 
 
 # import data A --------------------------------------------------------------------------------------------------------
-data_a = readData("log-data-A.txt")
-x_a = []
-y_a = []
-for val in data_a:
-    x_a.append(val[0])
-    y_a.append(val[1])
+try:
+    data_a = readData("log-data-A.txt")
+    x_a = []
+    y_a = []
+    for val in data_a:
+        x_a.append(val[0])
+        y_a.append(val[1])
 
-# show data as it appears
-plt.scatter(x_a, y_a, marker='o')
-plt.grid(which='major')
+    # show data as it appears
+    plt.scatter(x_a, y_a, marker='o')
+    plt.grid(which='major')
 
-plt.xlabel('x-axis')
-plt.ylabel('y-axis')
-plt.title('Data A')
+    plt.xlabel('x-axis')
+    plt.ylabel('y-axis')
+    plt.title('Data A')
 
+    last_guess = float(input('Select a value as the initial guess for data set A: '))
+    iterations = 0
+    while True:
+        new_guess = next_guess(last_guess, x_a, y_a)
+        iterations += 1
+        print(str(last_guess) + ' -> ' + str(new_guess))
+        if abs(last_guess-new_guess) < 0.001:
+            a = new_guess
+            print('Number of iterations: ' + str(iterations) + '\n')
+            break
+        else:
+            last_guess = new_guess
 
-last_guess = float(input('Select a value as the initial guess: '))
-iterations = 0
-while True:
-    new_guess = next_guess(last_guess, x_a, y_a)
-    iterations += 1
-    print(str(last_guess) + ' -> ' + str(new_guess))
-    if abs(last_guess-new_guess) < 0.001:
-        a = new_guess
-        print('Number of iterations: ' + str(iterations) + '\n')
-        break
-    else:
-        last_guess = new_guess
+    xa_2 = np.linspace(0.01, max(x_a), 10000)
+    ya_2 = []
+    for val in xa_2:
+        ya_2.append(ln(a*val))
 
-xa_2 = np.linspace(0.5, max(x_a), 10000)
-ya_2 = []
-for val in xa_2:
-    ya_2.append(ln(a*val))
-
-plt.plot(xa_2, ya_2)
-plt.show()
-plt.close()
-
+    plt.plot(xa_2, ya_2, 'r')
+    plt.show()
+    plt.close()
+except:
+    plt.close()
+    print("Something went wrong, try a different initial value.")
 
 # import data B --------------------------------------------------------------------------------------------------------
-data_b = readData("log-data-B.txt")
-x_b = []
-y_b = []
-for val in data_b:
-    x_b.append(val[0])
-    y_b.append(val[1])
+try:
+    data_b = readData("log-data-B.txt")
+    x_b = []
+    y_b = []
+    for val in data_b:
+        x_b.append(val[0])
+        y_b.append(val[1])
 
-# show data as it appears
-plt.scatter(x_b, y_b, marker='o')
-plt.grid(which='major')
+    # show data as it appears
+    plt.scatter(x_b, y_b, marker='o')
+    plt.grid(which='major')
 
-plt.xlabel('x-axis')
-plt.ylabel('y-axis')
-plt.title('Data B')
+    plt.xlabel('x-axis')
+    plt.ylabel('y-axis')
+    plt.title('Data B')
 
+    last_guess = float(input('Select a value as the initial guess for data set B: '))
+    iterations = 0
+    while True:
+        new_guess = next_guess(last_guess, x_b, y_b)
+        iterations += 1
+        print(str(last_guess) + ' -> ' + str(new_guess))
+        if abs(last_guess-new_guess) < 0.001:
+            a = new_guess
+            print('Number of iterations: ' + str(iterations) + '\n')
+            break
+        else:
+            last_guess = new_guess
 
-last_guess = float(input('Select a value as the initial guess: '))
-iterations = 0
-while True:
-    new_guess = next_guess(last_guess, x_b, y_b)
-    iterations += 1
-    print(str(last_guess) + ' -> ' + str(new_guess))
-    if abs(last_guess-new_guess) < 0.001:
-        a = new_guess
-        print('Number of iterations: ' + str(iterations) + '\n')
-        break
-    else:
-        last_guess = new_guess
+    xb_2 = np.linspace(0.01, max(x_b), 10000)
+    yb_2 = []
+    for val in xb_2:
+        yb_2.append(ln(a*val))
 
-xb_2 = np.linspace(0.5, max(x_b), 10000)
-yb_2 = []
-for val in xb_2:
-    yb_2.append(ln(a*val))
-
-plt.plot(xb_2, yb_2)
-plt.show()
-plt.close()
+    plt.plot(xb_2, yb_2, 'r')
+    plt.show()
+    plt.close()
+except:
+    plt.close()
+    print("Something went wrong, try a different initial value.")
 
 # import data C --------------------------------------------------------------------------------------------------------
-data_c = readData("log-data-C.txt")
-x_c = []
-y_c = []
-for val in data_c:
-    x_c.append(val[0])
-    y_c.append(val[1])
+try:
+    data_c = readData("log-data-C.txt")
+    x_c = []
+    y_c = []
+    for val in data_c:
+        x_c.append(val[0])
+        y_c.append(val[1])
 
-# show data as it appears
-plt.scatter(x_c, y_c, marker='o')
-plt.grid(which='major')
+    # show data as it appears
+    plt.scatter(x_c, y_c, marker='o')
+    plt.grid(which='major')
 
-plt.xlabel('x-axis')
-plt.ylabel('y-axis')
-plt.title('Data C')
+    plt.xlabel('x-axis')
+    plt.ylabel('y-axis')
+    plt.title('Data C')
 
-last_guess = float(input('Select a value as the initial guess: '))
-iterations = 0
-while True:
-    new_guess = next_guess(last_guess, x_c, y_c)
-    iterations += 1
-    print(str(last_guess) + ' -> ' + str(new_guess))
-    if abs(last_guess-new_guess) < 0.001:
-        a = new_guess
-        print('Number of iterations: ' + str(iterations) + '\n')
-        break
-    else:
-        last_guess = new_guess
+    last_guess = float(input('Select a value as the initial guess for data set C: '))
+    iterations = 0
+    while True:
+        new_guess = next_guess(last_guess, x_c, y_c)
+        iterations += 1
+        print(str(last_guess) + ' -> ' + str(new_guess))
+        if abs(last_guess-new_guess) < 0.001:
+            a = new_guess
+            print('Number of iterations: ' + str(iterations) + '\n')
+            break
+        else:
+            last_guess = new_guess
 
-xc_2 = np.linspace(0.5, max(x_c), 10000)
-yc_2 = []
-for val in xc_2:
-    yc_2.append(ln(a*val))
+    xc_2 = np.linspace(0.01, max(x_c), 10000)
+    yc_2 = []
+    for val in xc_2:
+        yc_2.append(ln(a*val))
 
-plt.plot(xc_2, yc_2)
-plt.show()
-plt.close()
+    plt.plot(xc_2, yc_2, 'r')
+    plt.show()
+    plt.close()
+except:
+    plt.close()
+    print("Something went wrong, try a different initial value.")
