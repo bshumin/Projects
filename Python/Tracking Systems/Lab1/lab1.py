@@ -38,6 +38,7 @@ def getNormalFuncFirstOrder(data, partnum):
     plt.scatter(x, y, marker='o')
     plt.grid(which='major')
 
+
     plt.xlabel('x-axis')
     plt.ylabel('y-axis')
     plt.title('Part ' + str(partnum))
@@ -59,7 +60,8 @@ def getNormalFuncFirstOrder(data, partnum):
     y2 = m * x2 + b
 
     plt.plot(x2, y2, 'r')
-
+    plt.xticks([4, 5, 6, 7, 8, 9, 10])
+    plt.yticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
     plt.show()
     plt.close()
 
