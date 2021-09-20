@@ -36,7 +36,7 @@ def getNormalFuncFirstOrder(data, partnum):
 
     # show data as it appears
     plt.scatter(x, y, marker='o')
-    plt.grid(which='major')
+    # plt.grid(which='major')
 
 
     plt.xlabel('x-axis')
@@ -60,8 +60,10 @@ def getNormalFuncFirstOrder(data, partnum):
     y2 = m * x2 + b
 
     plt.plot(x2, y2, 'r')
-    plt.xticks([4, 5, 6, 7, 8, 9, 10])
-    plt.yticks([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])
+    plt.ylim([0, 15])
+
+    plt.xlim([4, 10])
+
     plt.show()
     plt.close()
 
@@ -78,7 +80,7 @@ def getNormalFuncInvX(data, partnum):
 
     # show data as it appears
     plt.scatter(x, y, marker='.')
-    plt.grid()
+    #plt.grid()
 
     plt.xlabel('# of Bites')
     plt.ylabel('Kcals/bite')
@@ -99,6 +101,10 @@ def getNormalFuncInvX(data, partnum):
     x2 = np.linspace(0.5, max(x), 10000)
     y2 = m * (1 / x2) + b
 
+    plt.xlim([-10, 200])
+    plt.ylim([-10, 150])
+    # plt.yscale("log")
+    # plt.xscale("log")
     plt.plot(x2, y2, 'r')
 
     plt.show()
