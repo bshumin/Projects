@@ -38,10 +38,9 @@ def getNormalFuncFirstOrder(data, partnum):
     plt.scatter(x, y, marker='o')
     # plt.grid(which='major')
 
-
-    plt.xlabel('x-axis')
-    plt.ylabel('y-axis')
-    plt.title('Part ' + str(partnum))
+    plt.xlabel('x-axis', fontsize=18)
+    plt.ylabel('y-axis', fontsize=18)
+    plt.title('Part ' + str(partnum), fontsize=20)
     # plt.show()
 
     mat_x = (mat_a.getT() * mat_a)
@@ -82,9 +81,9 @@ def getNormalFuncInvX(data, partnum):
     plt.scatter(x, y, marker='.')
     #plt.grid()
 
-    plt.xlabel('# of Bites')
-    plt.ylabel('Kcals/bite')
-    plt.title('Part ' + str(partnum))
+    plt.xlabel('# of Bites',fontsize=18)
+    plt.ylabel('Kcals/bite',fontsize=18)
+    plt.title('Part ' + str(partnum),fontsize=20)
 
     mat_x = (mat_a.getT() * mat_a)
     mat_x = np.linalg.inv(mat_x)
