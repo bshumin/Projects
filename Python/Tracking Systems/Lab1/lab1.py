@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+plt.rcParams['font.size'] = '20'
 
 # helper functions
 def getXY(matrix, type):
@@ -36,11 +36,10 @@ def getNormalFuncFirstOrder(data, partnum):
 
     # show data as it appears
     plt.scatter(x, y, marker='o')
-    # plt.grid(which='major')
 
-    plt.xlabel('x-axis', fontsize=18)
-    plt.ylabel('y-axis', fontsize=18)
-    plt.title('Part ' + str(partnum), fontsize=20)
+    plt.xlabel('x-axis', fontsize=30)
+    plt.ylabel('y-axis', fontsize=30)
+    plt.title('Part ' + str(partnum), fontsize=32)
     # plt.show()
 
     mat_x = (mat_a.getT() * mat_a)
@@ -62,9 +61,9 @@ def getNormalFuncFirstOrder(data, partnum):
     plt.ylim([0, 15])
 
     plt.xlim([4, 10])
-
     plt.show()
     plt.close()
+
 
 def getNormalFuncInvX(data, partnum):
     [x, y] = getXY(data3, 2)
@@ -81,9 +80,9 @@ def getNormalFuncInvX(data, partnum):
     plt.scatter(x, y, marker='.')
     #plt.grid()
 
-    plt.xlabel('# of Bites',fontsize=18)
-    plt.ylabel('Kcals/bite',fontsize=18)
-    plt.title('Part ' + str(partnum),fontsize=20)
+    plt.xlabel('# of Bites', fontsize=30)
+    plt.ylabel('Kcals/bite', fontsize=30)
+    plt.title('Part ' + str(partnum), fontsize=32)
 
     mat_x = (mat_a.getT() * mat_a)
     mat_x = np.linalg.inv(mat_x)
