@@ -58,49 +58,44 @@ def readData(file_in):
         print('Something went wrong in parsing the data from ' + file_in)
 
 
-def constantVelocity():
-    print()
+def constantVelocity(dyn_noise, meas_noise, T, velocity, pos):
+    vel_vec = velocity * np.ones(len(Pos))
+    Xt = [pos[0]]
+    Xdott = [vel_vec[0]]
+    for val in range(len(pos)):
+        # skip initialization
+        if val > 0:
+            # state transition
+            Xt.append(pos[val - 1] * pow(meas_noise, 2) + Xdott[val - 1] * T)
+            # dynamic noise
+            Xdott.append(Xdott[val - 1] + rand.gauss(0, pow(dyn_noise, 2)))
+
+    print(Xt)
+    M = [[1, 0, 0, 0], [0, 1, 0, 0]]
+    PHI = [[1, T], [0, 1]]
+
+    print(len(Xt))
+    print(len(pos))
+
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), Xt)
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), pos)
+    plt.xlabel('Time')
+    plt.ylabel('Position')
+    plt.title('1D-Velocity - 1')
+    plt.show()
 
 
-
-pos = readData("1D-data.txt")
+Pos = readData("1D-data.txt")
 
 
 # Control variables ================================================================================================== #
-dyn_noise = 1
-meas_noise = 0.3
-T = 1  # Timing variable
-velocity = 2
+Dyn_noise = .5
+Meas_noise = .3
+T = .1  # Timing variable
+velocity = 0
 # ==================================================================================================================== #
 
 # constant velocity model
-vel_vec = velocity * np.ones(len(pos))
-x_vals = [pos, vel_vec]
-Xmeas = np.matrix(x_vals)  # measured values
-print(Xmeas)
 
-Xt = [pos[0]]
-Xdott = [vel_vec[0]]
-for val in range(len(pos)):
-    # skip initialization
-    if val > 0:
-        # state transition
-        Xt.append(pos[val-1] + Xdott[val-1]*T)
-        # dynamic noise
-        Xdott.append(Xdott[val-1] + rand.gauss(0, pow(dyn_noise, 2)))
-
-print(Xt)
-M = [[1, 0, 0, 0], [0, 1, 0, 0]]
-PHI = [[1, T], [0, 1]]
-
-print(len(Xt))
-print(len(pos))
-
-plt.plot(np.linspace(0, T*len(pos), len(pos)), Xt)
-plt.plot(np.linspace(0, T*len(pos), len(pos)), pos)
-plt.xlabel('Time')
-plt.ylabel('Position')
-plt.title('1D-Velocity - 1')
-plt.show()
-
+constantVelocity(dyn_noise=.5, meas_noise=.3, T=.1, velocity=0, pos=Pos)
 
