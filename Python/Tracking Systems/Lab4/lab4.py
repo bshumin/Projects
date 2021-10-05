@@ -33,7 +33,7 @@ import random as rand
 
 
 # helper functions
-def readData(file_in):
+def readData(file_in, dim):
 
     fpt = ''  # fixes error in IDE of fpt not existing in scope (try/except will never allow for it to not be in scope)
     try:
@@ -43,14 +43,20 @@ def readData(file_in):
         exit()
     try:
         file_array = []
-
-        for line in fpt.readlines():
-            temp_array = line.replace('\n', '').split(' ')
-            for i in range(len(temp_array)):
-                temp_array = float(temp_array[i])
-            if temp_array:  # use implicit boolean property of list
-                file_array.append(temp_array)
-
+        if dim == 1:
+            for line in fpt.readlines():
+                temp_array = line.replace('\n', '').split(' ')
+                for i in range(len(temp_array)):
+                    temp_array = float(temp_array[i])
+                if temp_array:  # use implicit boolean property of list
+                    file_array.append(temp_array)
+        else:
+            for line in fpt.readlines():
+                temp_array = line.replace('\n', '').split(' ')
+                for i in range(len(temp_array)):
+                    temp_array[i] = float(temp_array[i])
+                if temp_array:  # use implicit boolean property of list
+                    file_array.append(temp_array)
         fpt.close()
 
         return file_array
@@ -58,44 +64,40 @@ def readData(file_in):
         print('Something went wrong in parsing the data from ' + file_in)
 
 
-def constantVelocity(dyn_noise, meas_noise, T, velocity, pos):
-    vel_vec = velocity * np.ones(len(Pos))
-    Xt = [pos[0]]
+def constantVelocity(dyn_noise, meas_noise, T, velocity, pos, title):
+    vel_vec = velocity * np.ones(len(pos))
+    Xt = [0]
     Xdott = [vel_vec[0]]
+    GtHt = dyn_noise
     for val in range(len(pos)):
-        # skip initialization
+        # skip first value
         if val > 0:
             # state transition
-            Xt.append(pos[val - 1] * pow(meas_noise, 2) + Xdott[val - 1] * T)
-            # dynamic noise
-            Xdott.append(Xdott[val - 1] + rand.gauss(0, pow(dyn_noise, 2)))
+            Yt = Xt[val-1] + rand.gauss(0, pow(meas_noise, 2))
+            Xt.append(Xt[val-1]+GtHt*(Yt-Xt[val-1]))
+            Xdott.append(Xdott[val-1] + GtHt*(Yt-Xt[val-1])/T)
 
+            # update equations
+            Xt[val-1] = Xt[val - 1] + Xdott[val - 1] * T
+            Xdott[val-1] = Xdott[val-1] + rand.gauss(0, pow(meas_noise, 2))
+    print(Xdott)
     print(Xt)
     M = [[1, 0, 0, 0], [0, 1, 0, 0]]
     PHI = [[1, T], [0, 1]]
-
-    print(len(Xt))
-    print(len(pos))
 
     plt.plot(np.linspace(0, T * len(pos), len(pos)), Xt)
     plt.plot(np.linspace(0, T * len(pos), len(pos)), pos)
     plt.xlabel('Time')
     plt.ylabel('Position')
-    plt.title('1D-Velocity - 1')
+    plt.title(title)
     plt.show()
 
 
-Pos = readData("1D-data.txt")
-
-
-# Control variables ================================================================================================== #
-Dyn_noise = .5
-Meas_noise = .3
-T = .1  # Timing variable
-velocity = 0
-# ==================================================================================================================== #
+Pos = readData("1D-data.txt", 1)
+data_2D = readData("2D-data.txt", 2)
 
 # constant velocity model
 
-constantVelocity(dyn_noise=.5, meas_noise=.3, T=.1, velocity=0, pos=Pos)
-
+constantVelocity(dyn_noise=.2, meas_noise=.2, T=1, velocity=0, pos=Pos, title='1D-Velocity - Balanced Q and R')
+constantVelocity(dyn_noise=0, meas_noise=1, T=1, velocity=0, pos=Pos, title='1D-Velocity - All Q')
+constantVelocity(dyn_noise=1, meas_noise=0.01, T=1, velocity=0, pos=Pos, title='1D-Velocity - All R')
