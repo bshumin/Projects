@@ -66,24 +66,27 @@ def readData(file_in, dim):
 
 def constantVelocity(dyn_noise, meas_noise, T, velocity, pos, title):
     vel_vec = velocity * np.ones(len(pos))
+    M = [[1, 0], [0, 1]]
     Xt = [0]
+    S = np.mat([[1, 0], [0, 1]])
     Xdott = [vel_vec[0]]
-    GtHt = dyn_noise
+    Kt = rand.gauss(0, pow(dyn_noise,2))
+    PHI = [[1, T], [0, 1]]
     for val in range(len(pos)):
         # skip first value
         if val > 0:
             # state transition
             Yt = Xt[val-1] + rand.gauss(0, pow(meas_noise, 2))
-            Xt.append(Xt[val-1]+GtHt*(Yt-Xt[val-1]))
-            Xdott.append(Xdott[val-1] + GtHt*(Yt-Xt[val-1])/T)
+            Xt.append(Xt[val-1]+Kt*(Yt-Xt[val-1]))
+            Xdott.append(Xdott[val-1] + Kt*(Yt-Xt[val-1])/T)
 
             # update equations
             Xt[val-1] = Xt[val - 1] + Xdott[val - 1] * T
             Xdott[val-1] = Xdott[val-1] + rand.gauss(0, pow(meas_noise, 2))
     print(Xdott)
     print(Xt)
-    M = [[1, 0, 0, 0], [0, 1, 0, 0]]
-    PHI = [[1, T], [0, 1]]
+    # M = [[1, 0, 0, 0], [0, 1, 0, 0]]
+    # PHI = [[1, T], [0, 1]]
 
     plt.plot(np.linspace(0, T * len(pos), len(pos)), Xt)
     plt.plot(np.linspace(0, T * len(pos), len(pos)), pos)
