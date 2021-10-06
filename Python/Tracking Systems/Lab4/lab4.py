@@ -4,6 +4,8 @@ import sympy as sp
 import math
 import random as rand
 
+plt.rcParams['font.size'] = '20'
+
 # Applying the KF
 # (1) determine state variables
 # (2) write state transition equations (nominal behavior)
@@ -14,23 +16,6 @@ import random as rand
 # (7) build covariance matrices
 # (8) build state transition and observation matrices
 # (9) check all matrix sizes
-
-# 2D constant velocity model
-# (1) xt = [xt;yt;x't;y't]
-# (2)
-#   xt+1  = xt + Tx't
-#   yt+1  = yt + Ty't
-#   x't+1 = x't
-#   y't+1 = y't
-# (3) dynamic noise = [0;0;N(0, sigma(n1)^2);N(0, sigma(n2)^2)]
-# (4) Yt = [x~t;y~t]
-# (5)
-#   x~t = xt
-#   y~t = yt
-# (6) measurement noise = [sigma(n1)^2);N(0, sigma(n2)^2)]
-# (7) cov(state) = cov(x) =
-#  NOTE: include cov(Q), cov(R) and PHI matrices in report as well
-
 
 # helper functions
 def readData(file_in, dim):
@@ -64,43 +49,109 @@ def readData(file_in, dim):
         print('Something went wrong in parsing the data from ' + file_in)
 
 
-def constantVelocity(dyn_noise, meas_noise, T, velocity, pos, title):
-    vel_vec = velocity * np.ones(len(pos))
-    M = [[1, 0], [0, 1]]
-    Xt = [0]
-    S = np.mat([[1, 0], [0, 1]])
-    Xdott = [vel_vec[0]]
-    Kt = rand.gauss(0, pow(dyn_noise,2))
-    PHI = [[1, T], [0, 1]]
+def kalman1D(Q, R, T, pos, title):
+    M = np.mat([1, 0])
+
+    PHI = np.mat([[1, T], [0, 1]])
+    Xt = np.mat([0, 0]).getT()  # x_{t-1,t-1}
+    St = np.mat([[1, 0], [0, 1]])
+    Y_pred = []
+    Q = np.mat([[0, 0], [0, Q]])
+    R = np.mat(R)
+
     for val in range(len(pos)):
-        # skip first value
-        if val > 0:
-            # state transition
-            Yt = Xt[val-1] + rand.gauss(0, pow(meas_noise, 2))
-            Xt.append(Xt[val-1]+Kt*(Yt-Xt[val-1]))
-            Xdott.append(Xdott[val-1] + Kt*(Yt-Xt[val-1])/T)
+        # predict next state
+        Xttm1 = PHI*Xt
+        # predict next state covariance
+        Sttm1 = PHI*St*PHI.getT() + Q
+        # Obtain measurement
+        Yt = pos[val]
+        # calculate Kalman gain
+        Kt = Sttm1*M.getT()*np.mat(M*Sttm1*M.getT() + R).getI()
+        # update state
+        Xt = Xttm1 + Kt*(Yt - M*Xttm1)
+        # update state covariance
+        St = (np.identity(2)-Kt*M)*Sttm1
 
-            # update equations
-            Xt[val-1] = Xt[val - 1] + Xdott[val - 1] * T
-            Xdott[val-1] = Xdott[val-1] + rand.gauss(0, pow(meas_noise, 2))
-    print(Xdott)
-    print(Xt)
-    # M = [[1, 0, 0, 0], [0, 1, 0, 0]]
-    # PHI = [[1, T], [0, 1]]
+        Y_pred.append(Xt[0][0])
 
-    plt.plot(np.linspace(0, T * len(pos), len(pos)), Xt)
-    plt.plot(np.linspace(0, T * len(pos), len(pos)), pos)
+    Y_pred = np.squeeze(np.asarray(Y_pred))
+    # print(X_pred)
+
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), Y_pred, 'r')
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), pos, 'grey')
     plt.xlabel('Time')
     plt.ylabel('Position')
     plt.title(title)
     plt.show()
 
 
-Pos = readData("1D-data.txt", 1)
+def kalman2D(Q, R, T, pos, title):
+    M = np.mat([[1, 0, 0, 0], [0, 1, 0, 0]])
+    PHI = np.mat([[1, 0, T, 0], [0, 1, 0, T], [0, 0, 1, 0], [0, 0, 0, 1]])
+    print(str(pos[0][0]))
+    Xt = np.mat([pos[0][0], pos[0][1], 0, 0]).getT()  # x_{t-1,t-1}
+    St = np.identity(4)
+    Y1_pred = []
+    Y2_pred = []
+    Q = np.mat([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, Q, 0], [0, 0, 0, Q]])
+    R = np.mat([[R, 0], [0, R]])
+    for val in range(len(pos)):
+        # predict next state
+        Xttm1 = PHI*Xt
+        print("Xttml" + str(Xttm1))
+        # predict next state covariance
+        Sttm1 = PHI*St*PHI.getT() + Q
+        print("Sttml" + str(Sttm1))
+        # Obtain measurement
+        Yt = pos[val]
+        print("Yt" + str(Yt))
+        # calculate Kalman gain
+        Kt = Sttm1*M.getT()*np.mat(M*Sttm1*M.getT() + R).getI()
+        print("Kt" + str(Kt))
+        # update state
+        Xt = Xttm1 + Kt*(Yt - M*Xttm1)
+        print("Xt" + str(Xt))
+        # update state covariance
+        St = (np.identity(4)-Kt*M)*Sttm1
+        print("St" + str(St))
+        Y1_pred.append(Xt[0, 0])
+        Y2_pred.append(Xt[0, 1])
+        print()
+
+    Y_pred = np.squeeze(np.asarray(Y1_pred))
+
+    allData = np.array(pos)
+
+    data1 = []
+    data2 = []
+    for val in range(len(allData)):
+        data1.append(allData[val, 0])
+        data2.append(allData[val, 1])
+    # print(data1)
+    # print(data2)
+    plt.plot(np.linspace(0, T * len(data1), len(data1)), Y1_pred, 'r')
+    plt.plot(np.linspace(0, T * len(data1), len(data1)), data1, 'grey')
+    plt.xlabel('Time')
+    plt.ylabel('Position')
+    plt.title("2D data part1" + title)
+    plt.show()
+
+    plt.plot(np.linspace(0, T * len(data1), len(data1)), Y2_pred, 'r')
+    plt.plot(np.linspace(0, T * len(data1), len(data1)), data2, 'grey')
+    plt.xlabel('Time')
+    plt.ylabel('Position')
+    plt.title("2D data part2" + title)
+    plt.show()
+
+
+data_1D = readData("1D-data.txt", 1)
 data_2D = readData("2D-data.txt", 2)
 
 # constant velocity model
+kalman1D(Q=.000001, R=1, T=1, pos=data_1D, title='1D-Velocity - Q=1E-6 R=1')
+kalman1D(Q=.0000000001, R=1, T=1, pos=data_1D, title='1D-Velocity - Q=1E-10 R=1')
+kalman1D(Q=.001, R=1, T=1, pos=data_1D, title='1D-Velocity - Q=1E-3 R=1')
 
-constantVelocity(dyn_noise=.2, meas_noise=.2, T=1, velocity=0, pos=Pos, title='1D-Velocity - Balanced Q and R')
-constantVelocity(dyn_noise=0, meas_noise=1, T=1, velocity=0, pos=Pos, title='1D-Velocity - All Q')
-constantVelocity(dyn_noise=1, meas_noise=0.01, T=1, velocity=0, pos=Pos, title='1D-Velocity - All R')
+# 2D model
+kalman2D(Q=.01, R=1, T=1, pos=data_2D, title=' - Q=0.001 R=1')
