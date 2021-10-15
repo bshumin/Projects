@@ -89,7 +89,6 @@ def kalman1D(Q, R, T, pos, title):
 def kalman2D(Q, R, T, pos, title):
     M = np.mat([[1, 0, 0, 0], [0, 1, 0, 0]])
     PHI = np.mat([[1, 0, T, 0], [0, 1, 0, T], [0, 0, 1, 0], [0, 0, 0, 1]])
-    print(str(pos[0][0]))
     Xt = np.mat([pos[0][0], pos[0][1], 0, 0]).getT()  # x_{t-1,t-1}
     St = np.identity(4)
     Y1_pred = []
@@ -99,25 +98,18 @@ def kalman2D(Q, R, T, pos, title):
     for val in range(len(pos)):
         # predict next state
         Xttm1 = PHI*Xt
-        print("Xttml" + str(Xttm1))
         # predict next state covariance
         Sttm1 = PHI*St*PHI.getT() + Q
-        print("Sttml" + str(Sttm1))
         # Obtain measurement
         Yt = pos[val]
-        print("Yt" + str(Yt))
         # calculate Kalman gain
         Kt = Sttm1*M.getT()*np.mat(M*Sttm1*M.getT() + R).getI()
-        print("Kt" + str(Kt))
         # update state
         Xt = Xttm1 + Kt*(Yt - M*Xttm1)
-        print("Xt" + str(Xt))
         # update state covariance
         St = (np.identity(4)-Kt*M)*Sttm1
-        print("St" + str(St))
         Y1_pred.append(Xt[0, 0])
         Y2_pred.append(Xt[0, 1])
-        print()
 
     Y_pred = np.squeeze(np.asarray(Y1_pred))
 
