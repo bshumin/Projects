@@ -1,8 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import math
-import sympy as sp
-import math
 import random as rand
 
 plt.rcParams['font.size'] = '20'
@@ -49,8 +47,8 @@ def readData(file_in):
 def extended_kalman_sin(Q, R, T, pos, true_pos, title):
 
     dfda = np.mat([[0, 0, 0],
-            [0, 1, 0],
-            [0, 0, 0]])
+                   [0, 1, 0],
+                   [0, 0, 0]])
     dgdx = np.mat([[0, 0, 1]])
     dgdn = np.mat([1])
 
@@ -59,18 +57,21 @@ def extended_kalman_sin(Q, R, T, pos, true_pos, title):
                  [0, 0, 0]])
     Xt = np.mat([0, 0, 0]).getT()
     pred = []
-    fxtm1tm1 = np.mat([Xt[0]+Xt[1]*T]).getT()
-    gxtnt = []
 
-    Q = np.mat([[0, 0, 0],
-         [0, pow(Q, 2), 0],
-         [0, 0, 0]])
+    Q = np.mat([[0, 0,          0],
+                [0, pow(Q, 2),  0],
+                [0, 0,          0]])
     R = np.mat([pow(R, 2)])
 
     for val in range(len(pos)):
-        dfdx = np.mat([[1, T, 0],
-            [0, 1, 0],
-            [(1 / 10) * math.cos(Xt[0]), 0, 0]])
+        # print('Xt: ' + "\n" + str(Xt[1, 0]) + "\n")
+        fxtm1tm1 = np.mat([[Xt[0, 0] + Xt[1, 0] * T], [Xt[1, 0] + Q[1, 1]], [math.sin(Xt[0, 0] / 10)]])
+        # print("fxtm1tm1" + str(fxtm1tm1) + "\n")
+        # print()
+        gxtnt = [Xt[2] + R]
+        dfdx = np.mat([[1,                          T, 0],
+                       [0,                          1, 0],
+                       [(1 / 10) * math.cos(Xt[0]), 0, 0]])
         # predict next state
         Xttm1 = fxtm1tm1
         # predict next state covariance
@@ -80,21 +81,22 @@ def extended_kalman_sin(Q, R, T, pos, true_pos, title):
         # calculate Kalman gain
         Kt = Sttm1*dgdx.getT()*pow((dgdx*Sttm1*dgdx.getT() + dgdn*R*dgdn.getT()), -1)
         # update state
-        Xt = Xttm1 + Kt*(Yt - gxtnt)
+        Xt = Xttm1 + Kt*(Yt - gxtnt[0][0, 0])
+        # print(Xt)
         # update state covariance
         St = (np.identity(3)-Kt*dgdx)*Sttm1
 
         pred.append(Xt[0][0])
 
     pred = np.squeeze(np.asarray(pred))
-    # print(X_pred)
+    print(pred)
     #
-    # plt.plot(np.linspace(0, T * len(pos), len(pos)), pred, 'r')
-    # plt.plot(np.linspace(0, T * len(pos), len(pos)), pos, 'grey')
-    # plt.xlabel('Time')
-    # plt.ylabel('Position')
-    # plt.title(title)
-    # plt.show()
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), pred, 'r')
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), true_pos, 'grey')
+    plt.xlabel('Time')
+    plt.ylabel('Position')
+    plt.title(title)
+    plt.show()
 
 
 [true_data_1, meas_data_1] = readData("data1.txt")
