@@ -54,26 +54,23 @@ def extended_kalman_sin(Q, R, T, pos, true_pos, title):
 
     St = np.mat([[1, 0, 0],
                  [0, 1, 0],
-                 [0, 0, 0]])
+                 [0, 0, 1]])
     Xt = np.mat([0, 0, 0]).getT()
     pred = []
 
-    Q = np.mat([[0, 0,          0],
-                [0, pow(Q, 2),  0],
-                [0, 0,          0]])
-    R = np.mat([pow(R, 2)])
+    Q = np.mat([[0, 0, 0],
+                [0, Q, 0],
+                [0, 0, 0]])
+    R = np.mat([R])
 
     for val in range(len(pos)):
-        # print('Xt: ' + "\n" + str(Xt[1, 0]) + "\n")
-        fxtm1tm1 = np.mat([[Xt[0, 0] + Xt[1, 0] * T], [Xt[1, 0] + Q[1, 1]], [math.sin(Xt[0, 0] / 10)]])
-        # print("fxtm1tm1" + str(fxtm1tm1) + "\n")
-        # print()
-        gxtnt = [Xt[2] + R]
-        dfdx = np.mat([[1,                          T, 0],
-                       [0,                          1, 0],
-                       [(1 / 10) * math.cos(Xt[0]), 0, 0]])
+        fxtm1tm1 = np.mat([[Xt[0, 0] + Xt[1, 0] * T], [Xt[1, 0]], [math.sin(Xt[0, 0] / 10)]])
         # predict next state
-        Xttm1 = fxtm1tm1
+        Xt = fxtm1tm1
+        gxtnt = [Xt[2, 0]]
+        dfdx = np.mat([[1, T, 0],
+                       [0, 1, 0],
+                       [(1 / 10) * math.cos(Xt[0, 0] / 10), 0, 0]])
         # predict next state covariance
         Sttm1 = dfdx*St*dfdx.getT() + dfda*Q*dfda.getT()
         # Obtain measurement
@@ -81,16 +78,14 @@ def extended_kalman_sin(Q, R, T, pos, true_pos, title):
         # calculate Kalman gain
         Kt = Sttm1*dgdx.getT()*pow((dgdx*Sttm1*dgdx.getT() + dgdn*R*dgdn.getT()), -1)
         # update state
-        Xt = Xttm1 + Kt*(Yt - gxtnt[0][0, 0])
-        # print(Xt)
+        Xt = Xt + Kt*(Yt - gxtnt[0])
         # update state covariance
         St = (np.identity(3)-Kt*dgdx)*Sttm1
-
-        pred.append(Xt[0][0])
+        pred.append(Xt[2][0])
 
     pred = np.squeeze(np.asarray(pred))
     print(pred)
-    #
+
     plt.plot(np.linspace(0, T * len(pos), len(pos)), pred, 'r')
     plt.plot(np.linspace(0, T * len(pos), len(pos)), true_pos, 'grey')
     plt.xlabel('Time')
@@ -101,7 +96,10 @@ def extended_kalman_sin(Q, R, T, pos, true_pos, title):
 
 [true_data_1, meas_data_1] = readData("data1.txt")
 
-extended_kalman_sin(Q=0.000001, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1')
+extended_kalman_sin(Q=.1, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-6 R=1')
+extended_kalman_sin(Q=.0001, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-10 R=1')
+extended_kalman_sin(Q=.04, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-3 R=1')
+
 # constant velocity model
 # kalman1D(Q=.000001, R=1, T=1, pos=data_1D, title='1D-Velocity - Q=1E-6 R=1')
 # kalman1D(Q=.0000000001, R=1, T=1, pos=data_1D, title='1D-Velocity - Q=1E-10 R=1')
