@@ -18,6 +18,7 @@ plt.rcParams['font.size'] = '20'
 
 
 # helper functions
+# read in data from a file
 def readData(file_in):
 
     fpt = ''  # fixes error in IDE of fpt not existing in scope (try/except will never allow for it to not be in scope)
@@ -44,7 +45,8 @@ def readData(file_in):
         print('Something went wrong in parsing the data from ' + file_in)
 
 
-def extended_kalman_sin(Q, R, T, pos, true_pos, title):
+# create an extended kalman filter of model type sin/10
+def extended_kalman_sin10(Q, R, T, pos, true_pos, title):
 
     dfda = np.mat([[0, 0, 0],
                    [0, 1, 0],
@@ -72,38 +74,40 @@ def extended_kalman_sin(Q, R, T, pos, true_pos, title):
                        [0, 1, 0],
                        [(1 / 10) * math.cos(Xt[0, 0] / 10), 0, 0]])
         # predict next state covariance
-        Sttm1 = dfdx*St*dfdx.getT() + dfda*Q*dfda.getT()
+        St = dfdx*St*dfdx.getT() + dfda*Q*dfda.getT()
         # Obtain measurement
         Yt = pos[val]
         # calculate Kalman gain
-        Kt = Sttm1*dgdx.getT()*pow((dgdx*Sttm1*dgdx.getT() + dgdn*R*dgdn.getT()), -1)
+        Kt = St*dgdx.getT()*pow((dgdx*St*dgdx.getT() + dgdn*R*dgdn.getT()), -1)
         # update state
         Xt = Xt + Kt*(Yt - gxtnt[0])
         # update state covariance
-        St = (np.identity(3)-Kt*dgdx)*Sttm1
+        St = (np.identity(3)-Kt*dgdx)*St
         pred.append(Xt[2][0])
 
     pred = np.squeeze(np.asarray(pred))
     print(pred)
 
-    plt.plot(np.linspace(0, T * len(pos), len(pos)), pred, 'r')
-    plt.plot(np.linspace(0, T * len(pos), len(pos)), true_pos, 'grey')
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), pred, 'black', linestyle="-")
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), true_pos, 'grey', linestyle=":")
+    # plt.scatter(x=np.linspace(0, T * len(pos), len(pos)), y=pos, marker='.')
     plt.xlabel('Time')
     plt.ylabel('Position')
     plt.title(title)
     plt.show()
+    plt.close()
 
-
+# get data
 [true_data_1, meas_data_1] = readData("data1.txt")
 
-extended_kalman_sin(Q=.1, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-6 R=1')
-extended_kalman_sin(Q=.0001, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-10 R=1')
-extended_kalman_sin(Q=.04, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-3 R=1')
+# show data and measurements
+plt.plot(np.linspace(0, 1 * len(true_data_1), len(true_data_1)), true_data_1, 'black')
+plt.scatter(x=np.linspace(0, 1 * len(true_data_1), len(true_data_1)), y=meas_data_1, marker='.', c="grey")
+plt.show()
+plt.close()
 
-# constant velocity model
-# kalman1D(Q=.000001, R=1, T=1, pos=data_1D, title='1D-Velocity - Q=1E-6 R=1')
-# kalman1D(Q=.0000000001, R=1, T=1, pos=data_1D, title='1D-Velocity - Q=1E-10 R=1')
-# kalman1D(Q=.001, R=1, T=1, pos=data_1D, title='1D-Velocity - Q=1E-3 R=1')
-#
-# # 2D model
-# kalman2D(Q=.01, R=1, T=1, pos=data_2D, title=' - Q=0.001 R=1')
+# EKF calls
+extended_kalman_sin10(Q=.01, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-2 R=1')
+extended_kalman_sin10(Q=.001, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-3 R=1')
+extended_kalman_sin10(Q=.0001, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-4 R=1')
+
