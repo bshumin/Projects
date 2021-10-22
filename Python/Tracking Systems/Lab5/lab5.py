@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import math
 import random as rand
 
-plt.rcParams['font.size'] = '20'
+plt.rcParams['font.size'] = '30'
+plt.rcParams['font.family'] = 'serif'
 
 # Applying the KF
 # (1) determine state variables
@@ -97,17 +98,20 @@ def extended_kalman_sin10(Q, R, T, pos, true_pos, title):
     plt.show()
     plt.close()
 
+
 # get data
 [true_data_1, meas_data_1] = readData("data1.txt")
 
 # show data and measurements
 plt.plot(np.linspace(0, 1 * len(true_data_1), len(true_data_1)), true_data_1, 'black')
 plt.scatter(x=np.linspace(0, 1 * len(true_data_1), len(true_data_1)), y=meas_data_1, marker='.', c="grey")
+plt.xlabel('Time')
+plt.ylabel('Position')
 plt.show()
 plt.close()
 
 # EKF calls
-extended_kalman_sin10(Q=.01, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-2 R=1')
-extended_kalman_sin10(Q=.001, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-3 R=1')
-extended_kalman_sin10(Q=.0001, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='Part 1 - Q=1E-4 R=1')
-
+extended_kalman_sin10(Q=.01, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='')
+extended_kalman_sin10(Q=.001, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='')
+extended_kalman_sin10(Q=.0001, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='')
+extended_kalman_sin10(Q=.004, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='')  # idealish EKF
