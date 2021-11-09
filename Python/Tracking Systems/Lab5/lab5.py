@@ -87,7 +87,7 @@ def extended_kalman_sin10(Q, R, T, pos, true_pos, title):
         pred.append(Xt[2][0])
 
     pred = np.squeeze(np.asarray(pred))
-    print(pred)
+    # print(pred)
 
     plt.plot(np.linspace(0, T * len(pos), len(pos)), pred, 'black', linestyle="-")
     plt.plot(np.linspace(0, T * len(pos), len(pos)), true_pos, 'grey', linestyle=":")
