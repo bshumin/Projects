@@ -90,26 +90,81 @@ def extended_kalman_sin10(Q, R, T, pos, true_pos, title):
     plt.close()
 
 
-def particle_filter(pos, vel, meas, T, Q, R):
-    Xt = np.mat([[0], [0]])
+def particle_filter(pos, vel, meas, T=1, M=300):
+    # instantiate Xm and Wm matrices
     Xm = []
+    W = []
+    for i in range(M):
+        Xm.append([[0], [0]])
+        W.append(1/(i+1))
+    Xm = np.array(Xm)
+    W = np.mat(W)
+
+    siga = 0.0625
     sigm = 4.0
-    sign = pow(2, (-1)*8)
+    sign = 0.003906
     xm1 = -10
     xm2 = 10
-    nt = 0  # change to random sample from N(0, sign^2)
+
+    # get prediction vals
+    pos_pred = []
+    vel_pred = []
+
     for val in range(len(pos)):
-        fx = np.mat([[Xt[0, 0]+Xt[1, 0]*T], [np.piecewise(Xt[0, 0], [Xt[0, 0] < -20, -20 <= Xt[0, 0] < 0,
-                    0 <= Xt[0, 0] <= 20, Xt[0, 0] > 20], [2, Xt[1, 0] + abs(Q), Xt[1, 0] - abs(Q), -2])]])
-        Yt = np.mat(pos[val])
-        gx = np.mat(1 / (sqrt(2 * pi) * sigm) * exp((-pow(Xt[0, 0] - xm1, 2)) / (2 * pow(sigm, 2))) +
-                    1 / (sqrt(2 * pi) * sigm) * exp((-pow(Xt[0, 0] - xm2, 2)) / (2 * pow(sigm, 2))) + nt)
+
+        Yt = np.mat(meas[val])
+        sum_W = 0
+        new_Xm = []
+        for i in range(M):
+            if Xm[i, 0, 0] < -20:
+                fx = np.mat([[Xm[i, 0, 0] + Xm[i, 1, 0] * T], [2]])
+            elif (-20 <= Xm[i, 0, 0]) and (Xm[i, 0, 0] < 0):
+                fx = np.mat([[Xm[i, 0, 0] + Xm[i, 1, 0] * T], [Xm[i, 1, 0] + abs(rand.gauss(0, siga))]])
+            elif (0 <= Xm[i, 0, 0]) and (Xm[i, 0, 0] <= 20):
+                fx = np.mat([[Xm[i, 0, 0] + Xm[i, 1, 0] * T], [Xm[i, 1, 0] - abs(rand.gauss(0, siga))]])
+            else:
+                fx = np.mat([[Xm[i, 0, 0] + Xm[i, 1, 0] * T], [-2]])
+
+            gx = (1 / (sqrt(2 * pi) * sigm)) * exp((-pow(Xm[i, 0, 0] - xm1, 2)) / (2 * pow(sigm, 2))) + \
+                 (1 / (sqrt(2 * pi) * sigm)) * exp((-pow(Xm[i, 0, 0] - xm2, 2)) / (2 * pow(sigm, 2)))
+            py = np.mat((1 / (sqrt(2 * pi) * sign)) * exp((-pow(gx - pos[i], 2)) / (2 * pow(sign, 2))))
+            W[0, i] = W[0, i]*py[0, 0]
+            sum_W += W[0, i]
+            new_Xm.append(fx)
+
+        Xm = np.array(new_Xm)
+
+        sum_pos = 0
+        sum_vel = 0
+        for i in range(M):
+            W[0, i] = W[0, i]/sum_W  # normalize weights
+            sum_pos += W[0, i] * Xm[i, 0, 0]
+            sum_vel += W[0, i] * Xm[i, 1, 0]
+        pos_pred.append(sum_pos)
+        vel_pred.append(sum_vel)
+
+    pos_pred = np.squeeze(np.asarray(pos_pred))
+    vel_pred = np.squeeze(np.asarray(vel_pred))
+
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), pos_pred, 'black', linestyle="-")
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), pos, 'grey', linestyle=":")
+    plt.xlabel('Time')
+    plt.ylabel('Position')
+    plt.show()
+    plt.close()
+
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), vel_pred, 'black', linestyle="-")
+    plt.plot(np.linspace(0, T * len(pos), len(pos)), vel, 'grey', linestyle=":")
+    plt.xlabel('Time')
+    plt.ylabel('Velocity')
+    plt.show()
+    plt.close()
 
 
 # get data
 [act_pos, act_vel, meas_pos] = readData("data.txt")
 
-particle_filter(act_pos, act_vel, meas_pos, T=1, Q=0.002, R=0.002)
+particle_filter(act_pos, act_vel, meas_pos)
 
 # EKF calls
 # extended_kalman_sin10(Q=.01, R=1, T=1, pos=meas_data_1, true_pos=true_data_1, title='')
