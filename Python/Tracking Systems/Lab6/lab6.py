@@ -97,6 +97,7 @@ def particle_filter(pos, vel, meas, T=1, M=300, ESS_Thresh=0.5):
             Q = np.cumsum(W)
             t = np.random.uniform(low=0.0, high=1.0, size=M)
             t_sort = np.sort(t)
+            t[M-1] = 1.0
             i = j = 0
             Index = [0] * M
             while i < M:
