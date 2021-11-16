@@ -36,7 +36,7 @@ def readData(file_in):
         print('Something went wrong in parsing the data from ' + file_in)
 
 
-def particle_filter(pos, vel, meas, T=1, M=300, ESS_Thresh=0.5):
+def particle_filter(pos, vel, meas, T=1, M=500, ESS_Thresh=0.2):
     # instantiate Xm and Wm matrices
     Xm = []
     W = []
@@ -49,7 +49,9 @@ def particle_filter(pos, vel, meas, T=1, M=300, ESS_Thresh=0.5):
     sign = 0.003906
     xm1 = -10
     xm2 = 10
-
+    dist_pos = []  # selected dist_posribution of particles at a given instance
+    dist_vel = []
+    dist_ind = 0
     # get prediction vals
     pos_pred = []
     vel_pred = []
@@ -112,6 +114,11 @@ def particle_filter(pos, vel, meas, T=1, M=300, ESS_Thresh=0.5):
                 Xm[i][1] = Xm[Index[i]][1]
                 W[i] = 1 / M
                 i += 1
+        if val == floor((M/2)):
+            for ele in Xm:
+                dist_pos.append(ele[0])
+                dist_vel.append(ele[1])
+                dist_ind = val
 
     pos_pred = np.squeeze(np.asarray(pos_pred))
     vel_pred = np.squeeze(np.asarray(vel_pred))
@@ -127,6 +134,36 @@ def particle_filter(pos, vel, meas, T=1, M=300, ESS_Thresh=0.5):
     plt.plot(np.linspace(0, T * len(pos), len(pos)), vel, 'grey', linestyle=":")
     plt.xlabel('Time')
     plt.ylabel('Velocity')
+    plt.show()
+    plt.close()
+
+    plt.plot(np.linspace(0, T * len(meas_pos), len(meas_pos)), meas_pos, 'black', linestyle="-")
+    plt.xlabel('Time')
+    plt.ylabel('Position')
+    plt.show()
+    plt.close()
+
+    plt.scatter(x=np.linspace(0, T * len(dist_pos), M), y=dist_pos, marker='o')
+    # plt.scatter(x=np.linspace(0, T * len(dist_vel), 2*M), y=dist_vel, marker='.')
+    plt.plot(np.linspace(0, T * len(dist_pos), M), np.ones(M)*pos[dist_ind], 'black', linestyle="-")
+    plt.plot(np.linspace(0, T * len(dist_pos), M), np.ones(M) * pos_pred[dist_ind], 'black', linestyle=":")
+    plt.xlabel('Particle')
+    plt.ylabel('Predicted Position')
+    plt.show()
+    plt.close()
+
+    plt.scatter(x=np.linspace(0, T * len(dist_vel), M), y=dist_vel, marker='o')
+    # plt.scatter(x=np.linspace(0, T * len(dist_vel), 2*M), y=dist_vel, marker='.')
+    plt.plot(np.linspace(0, T * len(dist_vel), M), np.ones(M)*vel[dist_ind], 'black', linestyle="-")
+    plt.plot(np.linspace(0, T * len(dist_pos), M), np.ones(M) * vel_pred[dist_ind], 'black', linestyle=":")
+    plt.xlabel('Particle')
+    plt.ylabel('Predicted Velocity')
+    plt.show()
+    plt.close()
+
+    plt.scatter(x=np.linspace(0, T * len(dist_vel), M), y=W, marker='o')
+    plt.xlabel('Particle')
+    plt.ylabel('Weight')
     plt.show()
     plt.close()
 
