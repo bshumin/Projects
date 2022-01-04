@@ -2,7 +2,7 @@
 
 Hello, my name is Brandon Shumin and I have a BS in Computer Engineering from Clemson University and am currently pursuing a Master's degree in Computer Engineering with an emphasis on Intelligent System Design.
 
-The purpose of this repository is to provide documentation and source code for various that I have worked on. These projects are organized first by the language that they are written in (or the most applicable field), and then further into sub-projects as necessary.
+The purpose of this repository is to provide documentation and source code for various programming projects that I have worked on. These projects are organized first by the language that they are written in (or the most applicable field), and then further into sub-projects as necessary. Some projects may include more detailed documentation than others and any projects that may have involved other programmers will clearly denote the specific work that I contributed. 
 
 Some projects listed here are from earlier in my studies and serve to show the improvement in my technique and programming knowledge moreso than my abilities at the time.
 
