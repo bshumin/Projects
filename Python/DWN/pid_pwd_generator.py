@@ -1,5 +1,4 @@
 # This program randomly generates a list of 9-digit alphanumeric patient IDs and associated 9-digit numeric pwd
-# JUST GENERATE PIN
 import random
 import time
 import string
