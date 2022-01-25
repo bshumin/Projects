@@ -2,10 +2,10 @@ import requests
 import json
 import datetime
 from threading import Thread
-from time import process_time
+from time import clock, clock
 import warnings
 from queue import Queue
-import logging
+from statistics import stdev
 warnings.filterwarnings("ignore")
 
 # TODO: Investigate queueing https://www.shanelynn.ie/using-python-threading-for-multiple-results-queue/
@@ -18,7 +18,7 @@ def request_login():
 
 def thread_load_test(threads):
     threads = [Thread(target=request_login) for _ in range(threads)]
-    start_time = process_time()
+    start_time = clock()
 
     for t in threads:
         t.start()
@@ -26,42 +26,85 @@ def thread_load_test(threads):
     for t in threads:
         t.join()
 
-    stop_time = process_time()
+    stop_time = clock()
     return stop_time - start_time
 
 
-def crawl(q, thread_num):
+def crawl(q,  data):
     while not q.empty():
         work = q.get()  # fetch new work from the Queue
+        success = False
+        start_time = clock()
+
         try:
             work.start()
-            logging.info('Running thread {: }', thread_num)
+            # print('Running thread {: }', thread_num)
+            success = True
         except:
-            logging.error('Error with request!')
+            print('Error with request!')
+
+        thread_time = clock() - start_time
+        data.append({'time': thread_time,
+                     'success': success})
+
         # signal to the queue that task has been processed
         q.task_done()
     return True
 
 
-def queue_test(threads):
+def queue_test(threads, batch_size=50):
     q = Queue(maxsize=0)
-    num_threads = min(500, threads)
-    start_time = process_time()
 
-    for i in range(threads):
+    thread_batch = min(threads, batch_size)
+    data = []
+    for _ in range(threads):
         q.put(Thread(target=request_login))
 
-    for i in range(num_threads):
-        worker = Thread(target=crawl, args=(q, i))
+    start_time = clock()
+    for _ in range(threads):
+        worker = Thread(target=crawl, args=(q, data))
         worker.setDaemon(True)
         worker.start()
 
     q.join()
+    stop_time = clock()
 
-    stop_time = process_time()
-    logging.info('All tasks completed.')
 
-    return stop_time - start_time
+    # print('All tasks completed.')
+
+    total_time = stop_time - start_time
+
+    return [total_time, data]
+
+
+def parse_data(data, total_time, concurrent_requests):
+    sum_time = 0
+    failure = 0
+    num_entries = len(data)
+    throughput = num_entries/total_time
+    lrt = 0
+    vals = []
+    for entry in data:
+        sum_time += entry['time']
+
+        if not entry['success']:
+            failure += 1
+
+        if entry['time'] > lrt:
+            lrt = entry['time']
+        vals.append(entry['time'])
+
+    avg_load_time = sum_time/num_entries
+
+    parsed_data = {'requests': num_entries,
+                   'concurrent_users': concurrent_requests,
+                   'error_rate': failure/num_entries,
+                   'throughput': throughput,
+                   'avg_load_time': avg_load_time,
+                   'longest_request_time': lrt,
+                   'total_time': total_time,
+                   'std_dev': stdev(vals)}
+    return parsed_data
 
 
 # x = '{ "def":"isvalid", "id":"91283a1ac"}'
@@ -82,13 +125,22 @@ def queue_test(threads):
 # time = thread_load_test(1000)
 # print(time)
 
-time = queue_test(50)
-print(time)
-time = queue_test(100)
-print(time)
-time = queue_test(800)
-print(time)
-
+[time, data] = queue_test(50)
+print(parse_data(data, time, 50))
+# print("%.2f" % time)
+# print(data)
+[time, data] = queue_test(100)
+print(parse_data(data, time, 50))
+# print("%.2f" % time)
+# print(data)
+[time, data] = queue_test(800)
+print(parse_data(data, time, 50))
+# print("%.2f" % time)
+# print(data)
+[time, data] = queue_test(1600)
+print(parse_data(data, time, 50))
+# print("%.2f" % time)
+# print(data)
 
 
 # add patient into file
