@@ -1,6 +1,7 @@
 import numpy as np
-import matplotlib.pyplot  as plt
+import matplotlib.pyplot as plt
 import random as rand
+
 
 # function to read data file and format data into usable format
 def read_data(filename="data.txt"):
@@ -64,6 +65,8 @@ def show_norm_plots(norm_features, norm_target):
     axs[3, 1].plot(norm_features[:, 13], norm_target, 'o')
     axs[3, 2].plot(norm_features[:, 14], norm_target, 'o')
 
+    fig.delaxes(axs[3, 3])
+
     plt.show()
 
 
@@ -90,14 +93,53 @@ def split_dataset(features, targets, train_ratio=.8):
     return [train_features, train_target, validation_features, validation_targets]
 
 
+def make_weights(x, y):
+
+    n = len(x)
+    w = []
+    for wi in range(-10000, 10000):
+        sum1 = 0
+        for i in range(n):
+            sum1 += abs(x[i]*wi - y[i])
+        sum1 *= (1/n)
+        w.append(sum1)
+    print(w)
+    min_w = min(w)
+    print(min(w))
+
+    return True
+
+
 def predict(w, xi):
     # get prediction function
-    return np.dot(w, xi)
+    return np.cross(w, xi)
 
 
-def loss_func(n, x, y, d, w, lamda):
-    
-    return True
+def loss_func(fx, y, w, lamda):
+
+    sum1 = 0
+    for ele1, ele2 in fx, y:
+        sum1 += pow(ele1 - ele2, 2)
+    sum1 *= 1 / (2 * len(fx))
+
+    sum2 = 0
+    for ele in w:
+        sum2 += pow(ele, 2)
+    sum2 *= lamda/(2 * len(w))
+
+    jw = sum1 + sum2
+
+    return jw
+
+
+def minimize_loss(fx, x, y, lamda, w):
+
+    sum = 0
+    wj_arr = []
+    for wj in w:
+        for ele1, ele2, ele3 in fx, x, y:
+            sum += (ele1 - ele3) * ele2 + (lamda/(len(w)+1))*wj
+        wj_arr.append(sum)
 
 
 # learning rate parameters
@@ -118,7 +160,7 @@ one = np.ones((len(norm_features), 1))
 norm_features = np.append(norm_features, one, axis=1)
 norm_target = np.array(norm_target).reshape(len(norm_target), 1)
 
-# show_norm_plots(norm_features, norm_target)
+show_norm_plots(norm_features, norm_target)
 
 # split dataset into training and validation based on training ratio (defaults to 0.8-0.2 training to validation)
 [tf, tt, vf, vt] = split_dataset(norm_features, norm_target)
@@ -126,9 +168,11 @@ norm_target = np.array(norm_target).reshape(len(norm_target), 1)
 # get linear regression weights
 weights = np.linalg.inv(tf.T.dot(tf)).dot(tf.T).dot(tt)
 weights = np.transpose(weights)
+# weights = make_weights(tf, tt)
 tf = np.transpose(tf)
 
-fxi = predict(weights, tf)
+fx = [predict(weights, ele) for ele in tf]
+print(fx)
 
 
 
