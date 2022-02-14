@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import random as rand
+from numpy import linalg as la
 
 
 # function to read data file and format data into usable format
@@ -93,57 +94,55 @@ def split_dataset(features, targets, train_ratio=.8):
     return [train_features, train_target, validation_features, validation_targets]
 
 
-def make_weights(x, y):
+def ridge_regression(Xbar, y, lambda_val, alpha=0.01, sigma=0.001):
 
-    n = len(x)
-    w = []
-    for wi in range(-10000, 10000):
-        sum1 = 0
-        for i in range(n):
-            sum1 += abs(x[i]*wi - y[i])
-        sum1 *= (1/n)
-        w.append(sum1)
-    print(w)
-    min_w = min(w)
-    print(min(w))
+    n = np.shape(Xbar)[0]  # samples (should equal d+1 from project document)
+    m = np.shape(Xbar)[1]  # features
 
-    return True
+    # randomize initial weights
+    w = np.zeros([n, m], )
+    # print("weights:" + str(w.shape))
 
+    prev_diff = 1  # previous difference
+    delta_cost = 1  # set gradient difference high to begin with
+    iteration = 0  # keep count of iteration number
+    # use gradient to find optimized weights
+    all_loss = []
+    while delta_cost > sigma:
+        # for i in range(len(y)):
+        # get y estimation
+        yhat = w.T.dot(Xbar)  # f(xi)
+        print(Xbar.shape)
 
-def predict(w, xi):
-    # get prediction function
-    return np.cross(w, xi)
+        # calculate difference between prediction and actual
+        err = yhat - y  # f(xi)-yi
 
+        # calculate loss
+        loss = (1 / (2 * n)) * np.sum(err ** 2) + (lambda_val / 2 * m) * np.sum(np.square(w))
+        all_loss.append(loss)
+        print(loss)
 
-def loss_func(fx, y, w, lamda):
+        # calculate gradient
+        grad = (1 / n) * (err * Xbar + (lambda_val / m * w))
 
-    sum1 = 0
-    for ele1, ele2 in fx, y:
-        sum1 += pow(ele1 - ele2, 2)
-    sum1 *= 1 / (2 * len(fx))
+        # calculate MSE
+        MSE = (1 / (2 * m)) * np.sum(np.square(y - w * Xbar))
 
-    sum2 = 0
-    for ele in w:
-        sum2 += pow(ele, 2)
-    sum2 *= lamda/(2 * len(w))
+        # update weights
+        w = w - alpha * grad
 
-    jw = sum1 + sum2
+        # calculate difference to compare to sigma
+        delta_cost = abs(prev_diff - loss) * 100 / prev_diff
+        prev_diff = loss
 
-    return jw
+        iteration += 1
 
-
-def minimize_loss(fx, x, y, lamda, w):
-
-    sum = 0
-    wj_arr = []
-    for wj in w:
-        for ele1, ele2, ele3 in fx, x, y:
-            sum += (ele1 - ele3) * ele2 + (lamda/(len(w)+1))*wj
-        wj_arr.append(sum)
+    return [w, all_loss, iteration]
 
 
 # learning rate parameters
 alpha = 0.01
+sigma = 0.001
 lambda_r = 2  # lambda value for ridge regularization
 lambda_l = 0.3  # lambda value for lasso regularization
 
@@ -160,19 +159,18 @@ one = np.ones((len(norm_features), 1))
 norm_features = np.append(norm_features, one, axis=1)
 norm_target = np.array(norm_target).reshape(len(norm_target), 1)
 
-show_norm_plots(norm_features, norm_target)
+# show_norm_plots(norm_features, norm_target)
 
 # split dataset into training and validation based on training ratio (defaults to 0.8-0.2 training to validation)
 [tf, tt, vf, vt] = split_dataset(norm_features, norm_target)
 
-# get linear regression weights
-weights = np.linalg.inv(tf.T.dot(tf)).dot(tf.T).dot(tt)
-weights = np.transpose(weights)
-# weights = make_weights(tf, tt)
-tf = np.transpose(tf)
 
-fx = [predict(weights, ele) for ele in tf]
-print(fx)
+[weights, losses, iterations] = ridge_regression(tf, tt, lambda_r, alpha=alpha, sigma=sigma)
+
+print(weights.shape)
+print(iterations)
+print(len(losses))
 
 
-
+plt.plot(range(len(losses)), losses)
+plt.show()
