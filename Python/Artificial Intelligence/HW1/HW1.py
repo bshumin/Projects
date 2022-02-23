@@ -49,29 +49,6 @@ def normalize_data(data):
     return data
 
 
-def show_norm_plots(norm_features, norm_target):
-    fig, axs = plt.subplots(4, 4)
-    axs[0, 0].plot(norm_features[:, 0], norm_target, 'o')
-    axs[0, 1].plot(norm_features[:, 1], norm_target, 'o')
-    axs[0, 2].plot(norm_features[:, 2], norm_target, 'o')
-    axs[0, 3].plot(norm_features[:, 3], norm_target, 'o')
-    axs[1, 0].plot(norm_features[:, 4], norm_target, 'o')
-    axs[1, 1].plot(norm_features[:, 5], norm_target, 'o')
-    axs[1, 2].plot(norm_features[:, 6], norm_target, 'o')
-    axs[1, 3].plot(norm_features[:, 7], norm_target, 'o')
-    axs[2, 0].plot(norm_features[:, 8], norm_target, 'o')
-    axs[2, 1].plot(norm_features[:, 9], norm_target, 'o')
-    axs[2, 2].plot(norm_features[:, 10], norm_target, 'o')
-    axs[2, 3].plot(norm_features[:, 11], norm_target, 'o')
-    axs[3, 0].plot(norm_features[:, 12], norm_target, 'o')
-    axs[3, 1].plot(norm_features[:, 13], norm_target, 'o')
-    axs[3, 2].plot(norm_features[:, 14], norm_target, 'o')
-
-    fig.delaxes(axs[3, 3])
-
-    plt.show()
-
-
 # function to split data into training and validation sets
 def split_dataset(features, targets, train_ratio=.8):
     # create array of feature indices to randomly select from
@@ -101,9 +78,10 @@ def regression(w, xi):
 
 
 # function to perform ridge regression
-def ridge_regression(Xbar, y, lambda_val, alpha=0.01, epsilon=0.001):
+def ridge_regression(Xbar, y, test_x, test_y, lambda_val, alpha=0.01, epsilon=0.001):
     # get sample and feature sizes
     sample, feature = Xbar.shape
+    test_sample, _ = test_x.shape
 
     # initialize weights
     w = np.zeros(feature,)
@@ -143,8 +121,8 @@ def ridge_regression(Xbar, y, lambda_val, alpha=0.01, epsilon=0.001):
 
         # calculate MSE
         MSE = 0
-        for i in range(sample):
-            MSE += (y[i]-regression(w, Xbar[i, :]))**2
+        for i in range(test_sample):
+            MSE += (test_y[i]-regression(w, test_x[i, :]))**2
         MSE *= 1/(2*sample)
         all_MSE.append(MSE)
 
@@ -157,9 +135,10 @@ def ridge_regression(Xbar, y, lambda_val, alpha=0.01, epsilon=0.001):
 
 
 # function to perform ridge regression
-def lasso_regression(Xbar, y, lambda_val, alpha=0.01, epsilon=0.001):
+def lasso_regression(Xbar, y, test_x, test_y, lambda_val, alpha=0.01, epsilon=0.001):
     # get sample and feature sizes
     sample, feature = Xbar.shape
+    test_sample, _ = test_x.shape
 
     # initialize weights
     w = np.zeros(feature, )
@@ -204,8 +183,8 @@ def lasso_regression(Xbar, y, lambda_val, alpha=0.01, epsilon=0.001):
 
         # calculate MSE
         MSE = 0
-        for i in range(sample):
-            MSE += (y[i] - regression(w, Xbar[i, :])) ** 2
+        for i in range(test_sample):
+            MSE += (test_y[i] - regression(w, test_x[i, :])) ** 2
         MSE *= 1 / (2 * sample)
         all_MSE.append(MSE)
 
@@ -236,12 +215,10 @@ one = np.ones((len(norm_features), 1))
 norm_features = np.append(norm_features, one, axis=1)
 norm_target = np.array(norm_target).reshape(len(norm_target), 1)
 
-# show_norm_plots(norm_features, norm_target)
-
 # split dataset into training and validation based on training ratio (defaults to 0.8-0.2 training to validation)
 [tf, tt, vf, vt] = split_dataset(norm_features, norm_target)
 
-[weights, losses, mse, iterations] = ridge_regression(tf, tt, lambda_r, alpha=alpha, epsilon=epsilon)
+[weights, losses, mse, iterations] = ridge_regression(tf, tt, vf, vt, lambda_r, alpha=alpha, epsilon=epsilon)
 
 # plot loss and MSE against iterations
 plt.plot(range(iterations), losses)
@@ -262,7 +239,7 @@ print('Ridge Regression')
 print("Number of elements in w less than 0.01: " + str(count))
 print('Final squared loss: ' + str(losses[-1]) + '\n')
 
-[weights, losses, mse, iterations] = lasso_regression(tf, tt, lambda_l, alpha=alpha, epsilon=epsilon)
+[weights, losses, mse, iterations] = lasso_regression(tf, tt, vf, vt, lambda_l, alpha=alpha, epsilon=epsilon)
 
 # plot loss and MSE against iterations
 plt.plot(range(iterations), losses)
