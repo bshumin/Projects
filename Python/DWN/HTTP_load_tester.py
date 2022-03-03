@@ -2,14 +2,18 @@ import requests
 import json
 import datetime
 from threading import Thread
-from time import clock, clock
+from time import clock
 import warnings
 from queue import Queue
 from statistics import stdev
 warnings.filterwarnings("ignore")
 
-# TODO: Investigate queueing https://www.shanelynn.ie/using-python-threading-for-multiple-results-queue/
-
+# Queueing Notes: https://www.shanelynn.ie/using-python-threading-for-multiple-results-queue/
+# TODO: SEE BELOW
+# 6:00am-8:00pm = 95% of data
+# find statistics of mobile phone usage
+# simulate 1 hour of data at stress thresholds
+# simulate 24 minutes of data as a full day of testing
 
 # This function is used to send an http request to login a patient
 def request_login():
