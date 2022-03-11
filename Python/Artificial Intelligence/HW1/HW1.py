@@ -32,20 +32,22 @@ def normalize_data(data):
     feature_maxs = [data[0][0] for _ in data[0]]
 
     # get minimums and maxes for for all features
-    for row in data:
-        for i in range(len(row)):
-            if row[i] > feature_maxs[i]:
-                feature_maxs[i] = row[i]
-
-            if row[i] < feature_mins[i]:
-                feature_mins[i] = row[i]
+    # for row in data:
+    #     for i in range(len(row)):
+    #         if row[i] > feature_maxs[i]:
+    #             feature_maxs[i] = row[i]
+    #
+    #         if row[i] < feature_mins[i]:
+    #             feature_mins[i] = row[i]
+    for i in range(len(data[0])):
+        feature_mins[i] = np.min(data[:, i])
+        feature_maxs[i] = np.max(data[:, i])
 
     # normalize data
     for row in data:
         for i in range(len(row)):
             row[i] = (row[i] - feature_mins[i]) / (feature_maxs[i] - feature_mins[i])
             # new_data.append(row)
-
     return data
 
 
@@ -98,7 +100,7 @@ def ridge_regression(Xbar, y, test_x, test_y, lambda_val, alpha=0.01, epsilon=0.
         # calculate loss function
         Jw1 = 0
         for i in range(sample):
-            Jw1 += sum((regression(w, Xbar[i, :]) - y[i]) ** 2)
+            Jw1 += sum((regression(w, Xbar[i, :]) - y[i])**2)
         Jw1 *= (1 / (2 * sample))
 
         Jw2 = 0
@@ -123,12 +125,12 @@ def ridge_regression(Xbar, y, test_x, test_y, lambda_val, alpha=0.01, epsilon=0.
         MSE = 0
         for i in range(test_sample):
             MSE += (test_y[i]-regression(w, test_x[i, :]))**2
-        MSE *= 1/(2*sample)
+        MSE *= 1/(2*test_sample)
         all_MSE.append(MSE)
 
         # update loop-break condition if not the first iteration
         if len(all_Jw) > 1:
-            delta = abs(all_Jw[iterations-1]-all_Jw[iterations])*100/all_Jw[iterations-1]
+            delta = (abs(all_Jw[iterations-1]-all_Jw[iterations])*100)/all_Jw[iterations-1]
         iterations += 1  # increment iterations
 
     return w, all_Jw, all_MSE, iterations
@@ -175,8 +177,10 @@ def lasso_regression(Xbar, y, test_x, test_y, lambda_val, alpha=0.01, epsilon=0.
                 djw[j] += (y[i] - regression(w, Xbar[i, :])) * (-Xbar[i, j])
             djw[j] *= 1 / sample
 
-            djw[j] += (lambda_val / feature) * sqrt(w[j]**2)
-
+            if w[j] == 0:
+                djw[j] += (lambda_val / feature) * 1
+            else:
+                djw[j] += (lambda_val / feature) * (w[j])/sqrt(w[j]**2)
 
         # update weights
         w = w - alpha * djw
@@ -185,7 +189,7 @@ def lasso_regression(Xbar, y, test_x, test_y, lambda_val, alpha=0.01, epsilon=0.
         MSE = 0
         for i in range(test_sample):
             MSE += (test_y[i] - regression(w, test_x[i, :])) ** 2
-        MSE *= 1 / (2 * sample)
+        MSE *= 1 / (2 * test_sample)
         all_MSE.append(MSE)
 
         # update loop-break condition if not the first iteration
@@ -196,6 +200,13 @@ def lasso_regression(Xbar, y, test_x, test_y, lambda_val, alpha=0.01, epsilon=0.
     return w, all_Jw, all_MSE, iterations
 
 
+def small_weights(w):
+    count = 0
+    for ele in weights:
+        if abs(ele) < 0.01:
+            count += 1
+    return count
+
 # learning rate parameters
 alpha = 0.01
 epsilon = 0.001
@@ -204,12 +215,12 @@ lambda_l = 0.3  # lambda value for lasso regularization
 
 # get data and normalize
 full_data = read_data()
+full_data = np.array(full_data)
 norm_data = normalize_data(full_data)
-norm_data = np.array(norm_data)
+# norm_data = np.array(norm_data)
 
 # split target data from features
 [norm_features, norm_target] = norm_data[:, 0:-1], norm_data[:, -1]
-
 # append column of ones to features
 one = np.ones((len(norm_features), 1))
 norm_features = np.append(norm_features, one, axis=1)
@@ -223,38 +234,33 @@ norm_target = np.array(norm_target).reshape(len(norm_target), 1)
 # plot loss and MSE against iterations
 plt.plot(range(iterations), losses)
 plt.plot(range(iterations), mse)
-plt.title('Ridge Regression')
+plt.title('Ridge Regression Gradient Descent')
 plt.xlabel('Iterations')
 plt.ylabel('J$_k$(w)/MSE')
 plt.legend(['J$_k$(w)', 'MSE'])
 plt.show()
 
-# get
-count = 0
-for ele in weights:
-    if abs(ele) < 0.01:
-        count += 1
-print(losses)
+# get number of weights under 0.01
+count = small_weights(weights)
 print('Ridge Regression')
 print("Number of elements in w less than 0.01: " + str(count))
-print('Final squared loss: ' + str(losses[-1]) + '\n')
+print('Final loss: ' + str(losses[-1]))
+print('Final MSE: ' + str(mse[-1][0]) + '\n')
 
 [weights, losses, mse, iterations] = lasso_regression(tf, tt, vf, vt, lambda_l, alpha=alpha, epsilon=epsilon)
 
 # plot loss and MSE against iterations
 plt.plot(range(iterations), losses)
 plt.plot(range(iterations), mse)
-plt.title('Lasso Regression')
+plt.title('Lasso Regression Gradient Descent')
 plt.xlabel('Iterations')
 plt.ylabel('J$_k$(w)/MSE')
 plt.legend(['J$_k$(w)', 'MSE'])
 plt.show()
 
-count = 0
-for ele in weights:
-    if abs(ele) < 0.01:
-        count += 1
-print(losses)
+# get number of weights under 0.01
+count = small_weights(weights)
 print('Lasso Regression')
 print("Number of elements in w less than 0.01: " + str(count))
-print('Final squared loss: ' + str(losses[-1][0]) + '\n')
+print('Final loss: ' + str(losses[-1][0]))
+print('Final MSE: ' + str(mse[-1][0]) + '\n')
