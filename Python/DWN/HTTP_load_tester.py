@@ -23,8 +23,8 @@ warnings.filterwarnings("ignore")
 
 # This function is used to send an http request to login a patient
 def request_login():
-    param = '{ "def":"login", "id":"a686ee6c1", "pin":123456789}'
-    return requests.post('https://app.digitalwellnessnurse.com/dwn.php', data=param, verify=False)
+    param = 'YOUR_PARAMS_HERE'
+    return requests.post('YOUR_ADDRESS_HERE', data=param, verify=False)
 
 
 # This function runs a set of threads to call the request_login() function
