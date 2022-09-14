@@ -2,7 +2,7 @@ import requests
 import json
 import datetime
 from threading import Thread
-from time import process_time
+from time import perf_counter
 import time
 import warnings
 from queue import Queue
@@ -11,32 +11,34 @@ from matplotlib import pyplot as plt
 import matplotlib
 from time import sleep
 import numpy
+from contextlib import suppress
+import urllib3.exceptions
+import requests.exceptions
+
 warnings.filterwarnings("ignore")
 
-# Queueing Notes: https://www.shanelynn.ie/using-python-threading-for-multiple-results-queue/
-# TODO: SEE BELOW
-# 6:00am-8:00pm = 95% of data
-# find statistics of mobile phone usage
-# simulate 1 hour of data at stress thresholds
-# simulate 24 minutes of data as a full day of testing
+SEC_PER_MIN = 60
+MIN_PER_HOUR = 60
+HOUR_PER_DAY = 24
 
+# Queueing Notes: https://www.shanelynn.ie/using-python-threading-for-multiple-results-queue/
 
 # This function is used to send an http request to login a patient
 def request_login():
-    param = '{ "def":"login", "id":"a686ee6c1", "pin":123456789}'
+    # param = '{ "def":"login", "id":"78b2b1738", "pin":123456789}'
+    param = '{ "def":"getAllPastAnswers", "id":"78b2b1738", "pin":123456789, "appdb":"vls_07b9ad"}'
+    # param = '{ "def":"insert", "id":"78b2b1738", "pin":123456789, "date":"2022-06-05 10:48:00", "questions":{["Hello. I am your COVID Wellness Nurse Assistant. I can help you and your health care provider keep track of your symptoms during your quarantine period. If you answer a question and wish to go back and change your answer, please use the "UNDO" button at the end of each question.": "Begin"]}, "appdb": "vls_07b9ad"}'
     return requests.post('https://app.digitalwellnessnurse.com/dwn.php', data=param, verify=False)
 
 
 # This function runs a set of threads to call the request_login() function
 # -params: threads - number of threads (simulated patients) to run
-# NOTE: this function attempts to run all threads simultaneously, so at high numbers of threads, this acts as a stress
-#       test of the server
 def thread_login(threads):
     # create array of threads to be run
     threads = [Thread(target=request_login) for _ in range(threads)]
 
     # record start time of requests
-    start_time = process_time()
+    start_time = perf_counter()
 
     # start all threads
     for t in threads:
@@ -47,7 +49,7 @@ def thread_login(threads):
         t.join()
 
     # record stop time
-    stop_time = process_time()
+    stop_time = perf_counter()
     thread_time = stop_time - start_time
     data = []
     data.append({'time': thread_time,
@@ -66,20 +68,20 @@ def thread_login(threads):
 def crawl(q,  data):
     while not q.empty():
         work = q.get()  # fetch new work from the Queue
-        success = False
+        success = True
 
         # get start time for request
-        start_time = process_time()
+        start_time = perf_counter()
 
         # attempt the request
         try:
             work.start()
-            success = True
         except:
+            success = False
             print('Error with request!')
 
         # calculate total time for request and append data
-        thread_time = process_time() - start_time
+        thread_time = perf_counter() - start_time
         data.append({'time': thread_time,
                      'success': success})
 
@@ -94,7 +96,7 @@ def crawl(q,  data):
 # -return: array of the total time it took all threads to complete and the runtime data from the threads
 def queue_login(requests_total, batch_size=50):
     # create queue
-    q = Queue(maxsize=batch_size)
+    q = Queue(maxsize=0)
 
     # determine how many threads to run in parallel and create data
     thread_batch = min(requests_total, batch_size)
@@ -105,7 +107,7 @@ def queue_login(requests_total, batch_size=50):
         q.put(Thread(target=request_login))
 
     # record start time of all processes
-    start_time = process_time()
+    start_time = perf_counter()
 
     # start number of threads equal to the amount of threads desired at a a time
     for _ in range(thread_batch):
@@ -117,8 +119,9 @@ def queue_login(requests_total, batch_size=50):
     q.join()
 
     # record the time at which all threads complete and calculate total thread time
-    stop_time = process_time()
+    stop_time = perf_counter()
     total_time = stop_time - start_time
+
     return parse_data(data, total_time, batch_size)
 
 
@@ -254,11 +257,13 @@ def run_batch(range_arg, np, bs):
 # print(r.json())  # result 1 means that it worked
 
 # Stress Test ==========================================================================================================
+# print(request_login().text)
+#
 queue_data = []
 batch_data = []
 range_arg = 5
-np = 0
-bs_min = 1000
+# np = 1000
+bs_min = 3000
 bs_max = 5500
 increment = 500
 i = 1
@@ -280,6 +285,11 @@ for i in queue_data:
     longestRequestTime.append(i['longest_request_time'])
     totalTime.append(i['total_time'])
     error_rate.append(i['error_rate'])
+
+with open('stress_data.txt', 'w') as f:
+    f.write(str(queue_data))
+    f.write('\n')
+    f.write(str(batch_data))
 
 plt.plot(batch_data, avgLoadTime)
 plt.title('Average Response Time')
@@ -321,7 +331,6 @@ plt.xlabel('Number of users per batch')
 plt.ylabel('Error Rate')
 plt.grid()
 plt.show()
-
 # ======================================================================================================================
 
 # Load Test 1 ==========================================================================================================
@@ -330,12 +339,13 @@ plt.show()
 # range_arg = 5
 # np = 5000
 # bs_min = 100
-# bs_max = 600
-# for bs in range(bs_min, bs_max, 100):
+# bs_max = 550
+# increment = 50
+# for bs in range(bs_min, bs_max, increment):
 #     queue_data.append(avg_data(run_batch(range_arg, np, bs), bs))
 #     batch_data.append(bs)
 #     print(*['Batch', bs, 'complete'])
-#     sleep(60)
+#     sleep(10)  # wait a few seconds to clear the queue of the service
 #
 # avgLoadTime = []
 # throughput = []
@@ -347,17 +357,22 @@ plt.show()
 #     longestRequestTime.append(i['longest_request_time'])
 #     totalTime.append(i['total_time'])
 #
+# with open('load_data_getanswers.txt', 'w') as f:
+#     f.write(str(queue_data))
+#     f.write('\n')
+#     f.write(str(batch_data))
+#
 # plt.plot(batch_data, avgLoadTime)
 # plt.title('Average Response Time')
-# plt.xticks(numpy.arange(100, bs_max, 100))
-# plt.xlabel('Number of users per batch')
+# plt.xticks(numpy.arange(bs_min, bs_max, increment))
+# plt.xlabel('Number of requests per batch')
 # plt.ylabel('Time (seconds)')
 # plt.grid()
 # plt.show()
 #
 # plt.plot(batch_data, throughput)
 # plt.title('Throughput')
-# plt.xticks(numpy.arange(100, bs_max, 100))
+# plt.xticks(numpy.arange(bs_min, bs_max, increment))
 # plt.xlabel('Number of users per batch')
 # plt.ylabel('Responses per second')
 # plt.grid()
@@ -365,7 +380,7 @@ plt.show()
 #
 # plt.plot(batch_data, longestRequestTime)
 # plt.title('Longest Request Time')
-# plt.xticks(numpy.arange(100, bs_max, 100))
+# plt.xticks(numpy.arange(bs_min, bs_max, increment))
 # plt.xlabel('Number of users per batch')
 # plt.ylabel('Time (seconds)')
 # plt.grid()
@@ -373,9 +388,119 @@ plt.show()
 #
 # plt.plot(batch_data, totalTime)
 # plt.title('Total Request Time')
-# plt.xticks(numpy.arange(100, bs_max, 100))
+# plt.xticks(numpy.arange(bs_min, bs_max, increment))
 # plt.xlabel('Number of users per batch')
 # plt.ylabel('Time (seconds)')
+# plt.grid()
+# plt.show()
+
+# ======================================================================================================================
+
+# Load Test 2 (Simulation)==============================================================================================
+
+# min_per_hour = 1  # how many simulated minutes equate to a real world hour
+# total_sim = 24 * min_per_hour * SEC_PER_MIN
+# total_patients = 10000  # 2x the amount of expected maximum overall
+# queue_data = []
+# batch_data = []
+#
+# # the +1s are a way to ensure the final amount of patients is equal in the distribution. It loses 8 patients every 5000
+# # pop size due to rounding errors when dividing by 3.
+# pop_logins = [total_patients*(.002/3), total_patients*(.002/3)+1, total_patients*(.002/3)+1,
+#               total_patients*(.023/3), total_patients*(.023/3)+1, total_patients*(.023/3)+1,
+#               total_patients*(.125/3), total_patients*(.125/3)+1, total_patients*(.125/3)+1,
+#               total_patients*(.35/3), total_patients*(.35/3)+1, total_patients*(.35/3)+1,
+#               total_patients*(.35/3), total_patients*(.35/3)+1, total_patients*(.35/3)+1,
+#               total_patients*(.125/3), total_patients*(.125/3)+1, total_patients*(.125/3)+1,
+#               total_patients*(.023/3), total_patients*(.023/3)+1, total_patients*(.023/3)+1,
+#               total_patients*(.002/3), total_patients*(.002/3)+1, total_patients*(.002/3)+1]
+#
+# for i, item in enumerate(pop_logins):
+#     pop_logins[i] = int(item)
+#
+# print(sum(pop_logins))
+#
+# batch_sizes = [5, 5, 5, 10, 10, 10, 20, 20, 20, 40, 40, 40,
+#                40, 40, 40, 20, 20, 20, 10, 10, 10, 5, 5, 5]
+# time_batch = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
+#               13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+#
+# run = [False for i in range(25)]
+#
+# start_time = perf_counter()
+# running_time = 0.0
+#
+# while running_time < total_sim:
+#
+#     current_time = int(perf_counter() - start_time)
+#
+#     index = int(current_time/(60*min_per_hour))
+#
+#     if not run[index]:
+#         print(pop_logins[index])
+#         queue_data.append(queue_login(pop_logins[index], batch_sizes[index]))
+#         batch_data.append(pop_logins[index])
+#         print(*['Batch', index, 'complete'])
+#         print(queue_data[index])
+#         run[index] = True
+#
+#     running_time = perf_counter() - start_time
+#
+# avgLoadTime = []
+# throughput = []
+# longestRequestTime = []
+# totalTime = []
+# error_rate = []
+# for i in queue_data:
+#     avgLoadTime.append(i['avg_load_time'])
+#     throughput.append(i['throughput'])
+#     longestRequestTime.append(i['longest_request_time'])
+#     totalTime.append(i['total_time'])
+#     error_rate.append(i['error_rate'])
+#
+# with open('simulation_data.txt', 'w') as f:
+#     f.write(str(queue_data))
+#     f.write('\n')
+#     f.write(str(batch_data))
+#
+# plt.plot(time_batch, avgLoadTime)
+# plt.title('Average Response Time')
+# plt.xticks(numpy.arange(0, 24, 1))
+# plt.xlabel('Number of users per batch')
+# plt.ylabel('Time (seconds)')
+# plt.grid()
+# plt.show()
+#
+# plt.plot(time_batch, throughput)
+# plt.title('Throughput')
+# plt.xticks(numpy.arange(0, 24, 1))
+# plt.xlabel('Number of users per batch')
+# plt.ylabel('Responses per second')
+# plt.grid()
+# plt.show()
+#
+# plt.plot(time_batch, longestRequestTime)
+# plt.title('Longest Request Time')
+# plt.xticks(numpy.arange(0, 24, 1))
+# plt.xlabel('Number of users per batch')
+# plt.ylabel('Time (seconds)')
+# plt.grid()
+# plt.show()
+#
+# plt.plot(time_batch, totalTime)
+# plt.title('Total Request Time')
+# plt.xticks(numpy.arange(0, 24, 1))
+# plt.xlabel('Number of users per batch')
+# plt.ylabel('Time (seconds)')
+# plt.grid()
+# plt.show()
+#
+# plt.plot(time_batch, error_rate)
+# plt.title('Error Rate')
+# plt.xticks(numpy.arange(0, 24, 1))
+# plt.yticks(numpy.arange(0, .25, .05))
+# plt.xlabel('Number of users per batch')
+# plt.ylabel('Error Rate')
 # plt.grid()
 # plt.show()
 
